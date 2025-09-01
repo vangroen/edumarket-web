@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '../components/ui/Icon';
 import CourseEditModal from '../components/CourseEditModal';
-import { fetchData, updateData } from '../services/api';
+import CourseAddModal from '../components/CourseAddModal';
+import { fetchData, updateData, createData } from '../services/api';
 
-// Componente para las "píldoras" de tipo de curso. No cambia.
+// Componente para las "píldoras" de tipo de curso
 const CourseTypePill = ({ type }) => {
   const isEspecializacion = type.toLowerCase().includes('especialización');
   const pillClasses = `px-3 py-1 text-xs font-semibold rounded-full capitalize ${isEspecializacion ? 'bg-purple-500/20 text-purple-300' : 'bg-blue-500/20 text-blue-300'
@@ -11,37 +12,40 @@ const CourseTypePill = ({ type }) => {
   return <span className={pillClasses}>{type}</span>;
 };
 
-// --- NUEVO COMPONENTE: Píldora para la Modalidad ---
+// Componente para las "píldoras" de modalidad
 const ModalityPill = ({ modality }) => {
-    // Asignamos un color diferente dependiendo de la modalidad
     const isVirtual = modality.toLowerCase().includes('virtual');
     const pillClasses = `px-3 py-1 text-xs font-semibold rounded-full capitalize ${isVirtual ? 'bg-cyan-500/20 text-cyan-300' : 'bg-green-500/20 text-green-300'
       }`;
     return <span className={pillClasses}>{modality}</span>;
-  };
-
+};
 
 const CoursesPage = () => {
   const [courses, setCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Estados para modales
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // Estados para datos de formularios
   const [courseTypes, setCourseTypes] = useState([]);
   const [modalities, setModalities] = useState([]);
+  const [allInstitutions, setAllInstitutions] = useState([]);
 
-  const loadData = async () => {
+  // Estados para optimización de carga
+  const [isModalDataLoaded, setIsModalDataLoaded] = useState(false);
+  const [isOpeningModal, setIsOpeningModal] = useState(false);
+
+  // Carga solo los datos de la tabla al inicio
+  const loadCourses = async () => {
+    setIsLoading(true);
+    setError(null);
     try {
-      setIsLoading(true);
-      setError(null);
-      const [coursesData, typesData, modalitiesData] = await Promise.all([
-        fetchData('/courses'),
-        fetchData('/course-type'),
-        fetchData('/modality')
-      ]);
+      const coursesData = await fetchData('/courses');
       setCourses(coursesData);
-      setCourseTypes(typesData);
-      setModalities(modalitiesData);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -50,8 +54,37 @@ const CoursesPage = () => {
   };
 
   useEffect(() => {
-    loadData();
+    loadCourses();
   }, []);
+
+  // Carga los datos para los modales solo cuando se necesitan
+  const loadModalDataAndOpen = async (openAction) => {
+    if (isModalDataLoaded) {
+      openAction();
+      return;
+    }
+
+    setIsOpeningModal(true);
+    setError(null);
+    try {
+      const [typesData, modalitiesData, institutionsData] = await Promise.all([
+        fetchData('/course-type'),
+        fetchData('/modality'),
+        fetchData('/institution')
+      ]);
+      setCourseTypes(typesData);
+      setModalities(modalitiesData);
+      setAllInstitutions(institutionsData);
+      setIsModalDataLoaded(true);
+      
+      openAction();
+
+    } catch (err) {
+      setError("Error al cargar datos para el formulario.");
+    } finally {
+      setIsOpeningModal(false);
+    }
+  };
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('es-PE', {
@@ -60,13 +93,16 @@ const CoursesPage = () => {
     }).format(amount);
   };
 
+  // Manejadores para el modal de edición
   const handleEditClick = (course) => {
-    setEditingCourse(course);
-    setIsModalOpen(true);
+    loadModalDataAndOpen(() => {
+      setEditingCourse(course);
+      setIsEditModalOpen(true);
+    });
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
     setEditingCourse(null);
   };
 
@@ -74,41 +110,67 @@ const CoursesPage = () => {
     if (!editingCourse) return;
     try {
       await updateData(`/courses/${editingCourse.id}`, updatedData);
-      handleCloseModal();
-      loadData();
+      handleCloseEditModal();
+      loadCourses(); // Recargamos solo la tabla
     } catch (err) {
-      console.error("Error al guardar el curso:", err);
-      setError("No se pudo guardar el curso. Inténtalo de nuevo.");
+      console.error("Error al guardar:", err);
+      setError("No se pudo actualizar el curso.");
+    }
+  };
+
+  // Manejadores para el modal de añadir
+  const handleAddClick = () => {
+    loadModalDataAndOpen(() => {
+      setIsAddModalOpen(true);
+    });
+  };
+
+  const handleCloseAddModal = () => {
+    setIsAddModalOpen(false);
+  };
+
+  const handleCreateCourse = async (newCourseData) => {
+    try {
+        await createData('/courses', newCourseData);
+        handleCloseAddModal();
+        loadCourses(); // Recargar datos para mostrar el nuevo curso
+    } catch (err) {
+        console.error("Error al crear:", err);
+        setError("No se pudo crear el curso.");
     }
   };
 
   return (
     <div>
-        {/* ... (El encabezado de la página no cambia) ... */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8">
-            <div>
-            <h1 className="text-3xl font-bold text-dark-text-primary">Gestión de Cursos</h1>
-            <p className="text-dark-text-secondary mt-1">
-                Administra la información de los cursos.
-            </p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-dark-text-primary">Gestión de Cursos</h1>
+          <p className="text-dark-text-secondary mt-1">
+            Administra la información de los cursos.
+          </p>
+        </div>
+        <div className="flex items-center gap-4 mt-4 md:mt-0">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <Icon path="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" className="w-5 h-5 text-dark-text-secondary" />
             </div>
-            <div className="flex items-center gap-4 mt-4 md:mt-0">
-            <div className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <Icon path="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" className="w-5 h-5 text-dark-text-secondary" />
-                </div>
-                <input
-                type="text"
-                placeholder="Buscar curso..."
-                className="w-full bg-dark-surface border border-dark-border rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-brand-accent text-dark-text-primary"
-                />
-            </div>
-            <button className="flex items-center justify-center px-4 py-2 bg-brand-accent text-white rounded-lg hover:bg-blue-600 font-semibold shadow transition-colors flex-shrink-0">
+            <input
+              type="text"
+              placeholder="Buscar curso..."
+              className="w-full bg-dark-surface border border-dark-border rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-brand-accent text-dark-text-primary"
+            />
+          </div>
+          <button onClick={handleAddClick} disabled={isOpeningModal} className="flex items-center justify-center px-4 py-2 bg-brand-accent text-white rounded-lg hover:bg-blue-600 font-semibold shadow transition-colors flex-shrink-0 disabled:bg-slate-500 disabled:cursor-wait">
+             {isOpeningModal ? (
+                <Icon path="M16.023 9.348h4.992v-.001a10.987 10.987 0 00-2.3-5.842 10.987 10.987 0 00-5.843-2.3v4.992c0 .341.166.658.437.853l3.708 2.966c.27.218.632.245.92.062a.965.965 0 00.505-.921z" className="w-5 h-5 mr-2 animate-spin" />
+            ) : (
                 <Icon path="M12 4.5v15m7.5-7.5h-15" className="w-5 h-5 mr-2" />
-                Añadir Curso
-            </button>
-            </div>
+            )}
+            {isOpeningModal ? 'Cargando...' : 'Añadir Curso'}
+          </button>
+        </div>
       </div>
+
       <div className="bg-dark-surface rounded-lg shadow-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full">
@@ -144,13 +206,12 @@ const CoursesPage = () => {
                         ))}
                       </div>
                     </td>
-                    {/* --- CAMBIO AQUÍ: Usamos el nuevo componente ModalityPill --- */}
                     <td className="px-6 py-4 text-sm align-top">
                         <ModalityPill modality={course.modality.description} />
                     </td>
                     <td className="px-6 py-4 text-sm text-dark-text-secondary align-top">
                       <div className="flex items-center space-x-4">
-                        <button onClick={() => handleEditClick(course)} className="hover:text-dark-text-primary" title="Editar curso">
+                        <button onClick={() => handleEditClick(course)} disabled={isOpeningModal} className="hover:text-dark-text-primary disabled:text-slate-600 disabled:cursor-wait" title="Editar curso">
                           <Icon path="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" className="w-5 h-5" />
                         </button>
                         <button className="hover:text-red-500" title="Eliminar curso">
@@ -165,7 +226,6 @@ const CoursesPage = () => {
           </table>
         </div>
         
-        {/* ... (Resto del componente sin cambios) ... */}
         {isLoading && <p className="p-4 text-center text-dark-text-secondary">Cargando cursos...</p>}
         {error && <p className="p-4 text-center text-red-400">Error al cargar los datos: {error}</p>}
         {!isLoading && !error && courses.length === 0 && <p className="p-4 text-center text-dark-text-secondary">No se encontraron cursos.</p>}
@@ -175,14 +235,23 @@ const CoursesPage = () => {
         </div>
       </div>
 
-      {isModalOpen && (
+      {isEditModalOpen && (
         <CourseEditModal 
           course={editingCourse}
-          onClose={handleCloseModal}
+          onClose={handleCloseEditModal}
           onSave={handleSaveChanges}
           courseTypes={courseTypes}
           modalities={modalities}
         />
+      )}
+      {isAddModalOpen && (
+          <CourseAddModal 
+            onClose={handleCloseAddModal}
+            onSave={handleCreateCourse}
+            courseTypes={courseTypes}
+            modalities={modalities}
+            allInstitutions={allInstitutions}
+          />
       )}
     </div>
   );
