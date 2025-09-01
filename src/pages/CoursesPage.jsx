@@ -20,7 +20,6 @@ const CoursesPage = () => {
       try {
         setIsLoading(true);
         setError(null);
-        // Aseguramos que la llamada apunte al endpoint correcto que devuelve toda la data
         const data = await fetchData('/courses');
         setCourses(data);
       } catch (err) {
@@ -75,40 +74,44 @@ const CoursesPage = () => {
           <table className="min-w-full">
             <thead className="border-b border-dark-border">
               <tr>
-                {/* --- CAMBIO 1: AÑADIMOS TODAS LAS COLUMNAS --- */}
                 <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Nombre del Curso</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Tipo</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Instituciones</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Modalidad</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Costo</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Modalidad</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
             {!isLoading && !error && (
               <tbody className="divide-y divide-dark-border">
-                {/* --- CAMBIO 2: MAPEAMOS LOS NUEVOS DATOS EN LAS CELDAS --- */}
                 {courses.map((course) => (
                   <tr key={course.id}>
-                    <td className="px-6 py-4 text-sm font-medium text-dark-text-primary whitespace-nowrap">{course.name}</td>
-                    <td className="px-6 py-4 text-sm">
+                    <td className="px-6 py-4 text-sm font-medium text-dark-text-primary align-top">
+                      {course.name}
+                    </td>
+                    <td className="px-6 py-4 text-sm align-top">
                       <CourseTypePill type={course.courseType.description} />
                     </td>
-                    <td className="px-6 py-4 text-sm max-w-xs"> {/* 1. Limitar el ancho de la celda */}
-                      <div className="flex flex-wrap gap-2">
-                        {course.institutions.map((institution) => (
-                          <span
-                            key={institution.id}
-                            title={institution.name} // 2. Añadir el tooltip con el nombre completo
-                            className="px-2.5 py-1 text-xs font-semibold rounded-full bg-slate-700 text-slate-300 block truncate" // 3. Truncar el texto
-                          >
+                    <td className="px-6 py-4 text-sm text-dark-text-primary align-top">
+                      <div className="flex flex-col gap-y-2">
+                        {course.institutions.map(({ institution }) => (
+                          <div key={institution.id} className="truncate" title={institution.name}>
                             {institution.name}
-                          </span>
+                          </div>
                         ))}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap">{course.modality.description}</td>
-                    <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap">{formatCurrency(course.courseCost)}</td>
-                    <td className="px-6 py-4 text-sm text-dark-text-secondary">
+                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top whitespace-nowrap">
+                      <div className="flex flex-col gap-y-2">
+                        {course.institutions.map(({ institution, price }) => (
+                          <div key={institution.id}>{formatCurrency(price)}</div>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top whitespace-nowrap">
+                      {course.modality.description}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top">
                       <div className="flex items-center space-x-4">
                         <button className="hover:text-dark-text-primary" title="Ver detalles">
                           <Icon path="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM15 12a3 3 0 11-6 0 3 3 0 016 0z" className="w-5 h-5" />
