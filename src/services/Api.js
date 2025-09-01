@@ -22,11 +22,9 @@ export const fetchData = async (endpoint) => {
  * Función genérica para enviar actualizaciones (PUT) a la API.
  */
 export const updateData = async (endpoint, data) => {
-  // Log para depuración: Muestra la URL y los datos que se enviarán.
   console.log('--- Iniciando Petición PUT ---');
   console.log('Endpoint:', `${API_BASE_URL}${endpoint}`);
   console.log('Datos a enviar:', JSON.stringify(data, null, 2));
-
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'PUT',
@@ -55,13 +53,37 @@ export const updateData = async (endpoint, data) => {
  * Función genérica para crear registros (POST) en la API.
  */
 export const createData = async (endpoint, data) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+  
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`Error ${response.status}: ${errorBody || response.statusText}`);
+      }
+      
+      return await response.text().then(text => text ? JSON.parse(text) : { success: true });
+  
+    } catch (error) {
+      console.error(`Fallo al crear datos en el endpoint: ${endpoint}`, error);
+      throw error;
+    }
+};
+
+/**
+ * NUEVA FUNCIÓN: Función genérica para eliminar registros (DELETE) en la API.
+ * @param {string} endpoint - La ruta del recurso (ej. '/courses/1').
+ * @returns {Promise<any>} - La respuesta de la API.
+ */
+export const deleteData = async (endpoint) => {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
+      method: 'DELETE',
     });
 
     if (!response.ok) {
@@ -69,10 +91,11 @@ export const createData = async (endpoint, data) => {
       throw new Error(`Error ${response.status}: ${errorBody || response.statusText}`);
     }
     
-    return await response.text().then(text => text ? JSON.parse(text) : { success: true });
+    // Las respuestas DELETE exitosas a menudo no tienen cuerpo, por lo que podemos devolver un objeto de éxito.
+    return { success: true };
 
   } catch (error) {
-    console.error(`Fallo al crear datos en el endpoint: ${endpoint}`, error);
+    console.error(`Fallo al eliminar datos en el endpoint: ${endpoint}`, error);
     throw error;
   }
 };
