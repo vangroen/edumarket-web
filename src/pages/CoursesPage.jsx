@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '../components/ui/Icon';
-import { fetchData } from '../services/api';
+import CourseEditModal from '../components/CourseEditModal';
+import { fetchData, updateData } from '../services/api';
 
 // Componente para las "píldoras" de tipo de curso. No cambia.
 const CourseTypePill = ({ type }) => {
@@ -10,29 +11,48 @@ const CourseTypePill = ({ type }) => {
   return <span className={pillClasses}>{type}</span>;
 };
 
+// --- NUEVO COMPONENTE: Píldora para la Modalidad ---
+const ModalityPill = ({ modality }) => {
+    // Asignamos un color diferente dependiendo de la modalidad
+    const isVirtual = modality.toLowerCase().includes('virtual');
+    const pillClasses = `px-3 py-1 text-xs font-semibold rounded-full capitalize ${isVirtual ? 'bg-cyan-500/20 text-cyan-300' : 'bg-green-500/20 text-green-300'
+      }`;
+    return <span className={pillClasses}>{modality}</span>;
+  };
+
+
 const CoursesPage = () => {
   const [courses, setCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCourse, setEditingCourse] = useState(null);
+  const [courseTypes, setCourseTypes] = useState([]);
+  const [modalities, setModalities] = useState([]);
+
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const [coursesData, typesData, modalitiesData] = await Promise.all([
+        fetchData('/courses'),
+        fetchData('/course-types'),
+        fetchData('/modalities')
+      ]);
+      setCourses(coursesData);
+      setCourseTypes(typesData);
+      setModalities(modalitiesData);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const getCourses = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const data = await fetchData('/courses');
-        setCourses(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    getCourses();
+    loadData();
   }, []);
 
-  // Función para formatear el costo como moneda (Soles Peruanos)
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('es-PE', {
       style: 'currency',
@@ -40,35 +60,55 @@ const CoursesPage = () => {
     }).format(amount);
   };
 
+  const handleEditClick = (course) => {
+    setEditingCourse(course);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingCourse(null);
+  };
+
+  const handleSaveChanges = async (updatedData) => {
+    if (!editingCourse) return;
+    try {
+      await updateData(`/courses/${editingCourse.id}`, updatedData);
+      handleCloseModal();
+      loadData();
+    } catch (err) {
+      console.error("Error al guardar el curso:", err);
+      setError("No se pudo guardar el curso. Inténtalo de nuevo.");
+    }
+  };
+
   return (
     <div>
-      {/* El encabezado de la página no cambia */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-dark-text-primary">Gestión de Cursos</h1>
-          <p className="text-dark-text-secondary mt-1">
-            Administra la información de los cursos.
-          </p>
-        </div>
-        <div className="flex items-center gap-4 mt-4 md:mt-0">
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <Icon path="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" className="w-5 h-5 text-dark-text-secondary" />
+        {/* ... (El encabezado de la página no cambia) ... */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8">
+            <div>
+            <h1 className="text-3xl font-bold text-dark-text-primary">Gestión de Cursos</h1>
+            <p className="text-dark-text-secondary mt-1">
+                Administra la información de los cursos.
+            </p>
             </div>
-            <input
-              type="text"
-              placeholder="Buscar curso..."
-              className="w-full bg-dark-surface border border-dark-border rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-brand-accent text-dark-text-primary"
-            />
-          </div>
-          <button className="flex items-center justify-center px-4 py-2 bg-brand-accent text-white rounded-lg hover:bg-blue-600 font-semibold shadow transition-colors flex-shrink-0">
-            <Icon path="M12 4.5v15m7.5-7.5h-15" className="w-5 h-5 mr-2" />
-            Añadir Curso
-          </button>
-        </div>
+            <div className="flex items-center gap-4 mt-4 md:mt-0">
+            <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <Icon path="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" className="w-5 h-5 text-dark-text-secondary" />
+                </div>
+                <input
+                type="text"
+                placeholder="Buscar curso..."
+                className="w-full bg-dark-surface border border-dark-border rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-brand-accent text-dark-text-primary"
+                />
+            </div>
+            <button className="flex items-center justify-center px-4 py-2 bg-brand-accent text-white rounded-lg hover:bg-blue-600 font-semibold shadow transition-colors flex-shrink-0">
+                <Icon path="M12 4.5v15m7.5-7.5h-15" className="w-5 h-5 mr-2" />
+                Añadir Curso
+            </button>
+            </div>
       </div>
-
-      {/* Tabla de Cursos Actualizada */}
       <div className="bg-dark-surface rounded-lg shadow-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full">
@@ -86,18 +126,14 @@ const CoursesPage = () => {
               <tbody className="divide-y divide-dark-border">
                 {courses.map((course) => (
                   <tr key={course.id}>
-                    <td className="px-6 py-4 text-sm font-medium text-dark-text-primary align-top">
-                      {course.name}
-                    </td>
+                    <td className="px-6 py-4 text-sm font-medium text-dark-text-primary align-top">{course.name}</td>
                     <td className="px-6 py-4 text-sm align-top">
                       <CourseTypePill type={course.courseType.description} />
                     </td>
                     <td className="px-6 py-4 text-sm text-dark-text-primary align-top">
                       <div className="flex flex-col gap-y-2">
                         {course.institutions.map(({ institution }) => (
-                          <div key={institution.id} className="truncate" title={institution.name}>
-                            {institution.name}
-                          </div>
+                          <div key={institution.id} className="truncate" title={institution.name}>{institution.name}</div>
                         ))}
                       </div>
                     </td>
@@ -108,15 +144,13 @@ const CoursesPage = () => {
                         ))}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top whitespace-nowrap">
-                      {course.modality.description}
+                    {/* --- CAMBIO AQUÍ: Usamos el nuevo componente ModalityPill --- */}
+                    <td className="px-6 py-4 text-sm align-top">
+                        <ModalityPill modality={course.modality.description} />
                     </td>
                     <td className="px-6 py-4 text-sm text-dark-text-secondary align-top">
                       <div className="flex items-center space-x-4">
-                        <button className="hover:text-dark-text-primary" title="Ver detalles">
-                          <Icon path="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM15 12a3 3 0 11-6 0 3 3 0 016 0z" className="w-5 h-5" />
-                        </button>
-                        <button className="hover:text-dark-text-primary" title="Editar curso">
+                        <button onClick={() => handleEditClick(course)} className="hover:text-dark-text-primary" title="Editar curso">
                           <Icon path="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" className="w-5 h-5" />
                         </button>
                         <button className="hover:text-red-500" title="Eliminar curso">
@@ -130,17 +164,26 @@ const CoursesPage = () => {
             )}
           </table>
         </div>
-
+        
+        {/* ... (Resto del componente sin cambios) ... */}
         {isLoading && <p className="p-4 text-center text-dark-text-secondary">Cargando cursos...</p>}
         {error && <p className="p-4 text-center text-red-400">Error al cargar los datos: {error}</p>}
         {!isLoading && !error && courses.length === 0 && <p className="p-4 text-center text-dark-text-secondary">No se encontraron cursos.</p>}
 
-        {/* Paginación */}
         <div className="flex justify-between items-center p-4 text-sm text-dark-text-secondary">
           <p>Mostrando {courses.length} de {courses.length} cursos</p>
-          {/* ... (lógica de paginación) ... */}
         </div>
       </div>
+
+      {isModalOpen && (
+        <CourseEditModal 
+          course={editingCourse}
+          onClose={handleCloseModal}
+          onSave={handleSaveChanges}
+          courseTypes={courseTypes}
+          modalities={modalities}
+        />
+      )}
     </div>
   );
 };
