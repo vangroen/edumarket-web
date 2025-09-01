@@ -3,9 +3,10 @@ import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 import Dashboard from './pages/Dashboard';
 import CoursesPage from './pages/CoursesPage';
+import CatalogsPage from './pages/CatalogsPage';
 
 function App() {
-  const [activeView, setActiveView] = useState('dashboard'); // Vista inicial
+  const [activeView, setActiveView] = useState('dashboard');
 
   const renderContent = () => {
     switch (activeView) {
@@ -13,6 +14,8 @@ function App() {
         return <Dashboard />;
       case 'courses':
         return <CoursesPage />;
+      case 'catalogs':
+        return <CatalogsPage />;
       default:
         return (
           <div className="text-center p-10 bg-dark-surface rounded-lg">
