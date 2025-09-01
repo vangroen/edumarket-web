@@ -52,7 +52,7 @@ const CoursesPage = () => {
       setIsLoading(false);
     }
   };
-
+  
   useEffect(() => {
     loadCourses();
   }, []);
@@ -242,6 +242,7 @@ const CoursesPage = () => {
           onSave={handleSaveChanges}
           courseTypes={courseTypes}
           modalities={modalities}
+          allInstitutions={allInstitutions} 
         />
       )}
       {isAddModalOpen && (
