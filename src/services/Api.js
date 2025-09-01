@@ -29,9 +29,19 @@ export const fetchData = async (endpoint) => {
  * @returns {Promise<any>} - La respuesta de la API en formato JSON.
  */
 export const updateData = async (endpoint, data) => {
+    // ... (código existente sin cambios)
+};
+
+/**
+ * NUEVA FUNCIÓN: Función genérica para crear registros (POST) en la API.
+ * @param {string} endpoint - La ruta del recurso (ej. '/courses').
+ * @param {object} data - El cuerpo de la petición con los datos del nuevo registro.
+ * @returns {Promise<any>} - La respuesta de la API en formato JSON.
+ */
+export const createData = async (endpoint, data) => {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'PUT',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -42,13 +52,12 @@ export const updateData = async (endpoint, data) => {
       const errorBody = await response.text();
       throw new Error(`Error ${response.status}: ${errorBody || response.statusText}`);
     }
-
-    // Si el backend no devuelve cuerpo en el PUT, puedes retornar un objeto de éxito.
-    // O si devuelve el objeto actualizado, puedes usar response.json().
-    return await response.text().then(text => text ? JSON.parse(text) : {});
+    
+    // Si el backend devuelve el objeto creado, lo retornamos. Si no, un objeto de éxito.
+    return await response.text().then(text => text ? JSON.parse(text) : { success: true });
 
   } catch (error) {
-    console.error(`Fallo al actualizar datos en el endpoint: ${endpoint}`, error);
+    console.error(`Fallo al crear datos en el endpoint: ${endpoint}`, error);
     throw error;
   }
 };

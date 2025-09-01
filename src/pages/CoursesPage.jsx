@@ -36,8 +36,8 @@ const CoursesPage = () => {
       setError(null);
       const [coursesData, typesData, modalitiesData] = await Promise.all([
         fetchData('/courses'),
-        fetchData('/course-types'),
-        fetchData('/modalities')
+        fetchData('/course-type'),
+        fetchData('/modality')
       ]);
       setCourses(coursesData);
       setCourseTypes(typesData);
