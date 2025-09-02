@@ -5,14 +5,12 @@ import CourseAddModal from '../components/CourseAddModal';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import { fetchData, updateData, createData, deleteData } from '../services/api';
 
-// Componente para las "píldoras" de tipo de curso
+// --- (Componentes de Píldoras no cambian) ---
 const CourseTypePill = ({ type }) => {
   const isEspecializacion = type.toLowerCase().includes('especialización');
   const pillClasses = `px-3 py-1 text-xs font-semibold rounded-full capitalize ${isEspecializacion ? 'bg-purple-500/20 text-purple-300' : 'bg-blue-500/20 text-blue-300'}`;
   return <span className={pillClasses}>{type}</span>;
 };
-
-// Componente para las "píldoras" de modalidad
 const ModalityPill = ({ modality }) => {
     const isVirtual = modality.toLowerCase().includes('virtual');
     const pillClasses = `px-3 py-1 text-xs font-semibold rounded-full capitalize ${isVirtual ? 'bg-cyan-500/20 text-cyan-300' : 'bg-green-500/20 text-green-300'}`;
@@ -182,7 +180,8 @@ const CoursesPage = () => {
                         {!isLoading && !error && (
                             <tbody className="divide-y divide-dark-border">
                                 {courses.map((course) => (
-                                <tr key={course.id}>
+                                // --- CAMBIO AQUÍ: Añadimos las clases para el efecto hover ---
+                                <tr key={course.id} className="hover:bg-slate-700/50 transition-colors duration-150">
                                     <td className="px-6 py-4 text-sm font-medium text-dark-text-primary align-top">{course.name}</td>
                                     <td className="px-6 py-4 text-sm align-top">
                                     <CourseTypePill type={course.courseType.description} />

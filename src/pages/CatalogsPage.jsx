@@ -1,29 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Icon from '../components/ui/Icon';
+import CatalogCrud from '../components/catalogs/CatalogCrud'; // Importamos el componente CRUD
 
-// Lista de catálogos disponibles. En el futuro, podríamos hacer esto más dinámico.
 const catalogItems = [
-  { key: 'academicRank', title: 'Grado Académico' },
-  { key: 'conceptType', title: 'Tipo de Concepto' },
-  { key: 'courseType', title: 'Tipo de Curso' },
-  { key: 'documentType', title: 'Tipo de Documento' },
-  { key: 'installmentStatus', title: 'Estado de Cuota' },
-  { key: 'institutionType', title: 'Tipo de Institución' },
-  { key: 'modality', title: 'Modalidad' },
-  { key: 'paymentType', title: 'Tipo de Pago' },
-  { key: 'profession', title: 'Profesión' },
+  { key: 'academicRank', title: 'Grado Académico', endpoint: '/academic-rank', displayField: 'description' },
+  { key: 'conceptType', title: 'Tipo de Concepto', endpoint: '/concept-type', displayField: 'description' },
+  { key: 'courseType', title: 'Tipo de Curso', endpoint: '/course-type', displayField: 'description' },
+  { key: 'documentType', title: 'Tipo de Documento', endpoint: '/document-type', displayField: 'description' },
+  { key: 'installmentStatus', title: 'Estado de Cuota', endpoint: '/installment-status', displayField: 'status' },
+  { key: 'institutionType', title: 'Tipo de Institución', endpoint: '/institution-type', displayField: 'description' },
+  { key: 'modality', title: 'Modalidad', endpoint: '/modality', displayField: 'description' },
+  { key: 'paymentType', title: 'Tipo de Pago', endpoint: '/payment-type', displayField: 'description' },
+  { key: 'profession', title: 'Profesión', endpoint: '/profession', displayField: 'name' }, // <-- Aquí indicamos que el campo es 'name'
 ];
 
 const CatalogsPage = () => {
-  // Por ahora, el clic en un catálogo no hará nada, pero preparamos la función.
-  const handleCatalogClick = (catalogKey) => {
-    console.log(`Navegando al CRUD para: ${catalogKey}`);
-    // Aquí irá la lógica para mostrar la tabla del catálogo seleccionado.
-  };
+  const [selectedCatalog, setSelectedCatalog] = useState(null);
 
+  // Si hay un catálogo seleccionado, mostramos la vista CRUD
+  if (selectedCatalog) {
+    return (
+      <CatalogCrud 
+        catalogInfo={selectedCatalog} 
+        onBack={() => setSelectedCatalog(null)} // Función para volver a la lista
+      />
+    );
+  }
+  
+  // Si no, mostramos la lista de catálogos
   return (
     <div>
-      {/* Encabezado de la página */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-dark-text-primary">Gestión de Catálogos</h1>
         <p className="text-dark-text-secondary mt-1">
@@ -31,13 +37,12 @@ const CatalogsPage = () => {
         </p>
       </div>
 
-      {/* Lista de Catálogos */}
       <div className="bg-dark-surface rounded-lg shadow-lg">
         <ul className="divide-y divide-dark-border">
           {catalogItems.map((item) => (
             <li key={item.key}>
               <button
-                onClick={() => handleCatalogClick(item.key)}
+                onClick={() => setSelectedCatalog(item)}
                 className="w-full flex justify-between items-center p-4 text-left transition-colors hover:bg-slate-700/50"
               >
                 <span className="font-medium text-dark-text-primary">{item.title}</span>
