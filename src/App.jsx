@@ -4,6 +4,7 @@ import Header from './components/layout/Header';
 import Dashboard from './pages/Dashboard';
 import CoursesPage from './pages/CoursesPage';
 import CatalogsPage from './pages/CatalogsPage';
+import StudentsPage from './pages/StudentsPage'; // 1. Importar la nueva página
 
 function App() {
   const [activeView, setActiveView] = useState('dashboard');
@@ -16,6 +17,8 @@ function App() {
         return <CoursesPage />;
       case 'catalogs':
         return <CatalogsPage />;
+      case 'students':
+        return <StudentsPage />;
       default:
         return (
           <div className="text-center p-10 bg-dark-surface rounded-lg">
@@ -29,7 +32,6 @@ function App() {
         );
     }
   };
-
 
   return (
     <div className="flex h-screen bg-dark-bg text-dark-text-primary font-sans">
