@@ -4,7 +4,8 @@ import Header from './components/layout/Header';
 import Dashboard from './pages/Dashboard';
 import CoursesPage from './pages/CoursesPage';
 import CatalogsPage from './pages/CatalogsPage';
-import StudentsPage from './pages/StudentsPage'; // 1. Importar la nueva página
+import StudentsPage from './pages/StudentsPage';
+import AgentsPage from './pages/AgentsPage';
 
 function App() {
   const [activeView, setActiveView] = useState('dashboard');
@@ -17,6 +18,8 @@ function App() {
         return <CoursesPage />;
       case 'catalogs':
         return <CatalogsPage />;
+      case 'agents':
+        return <AgentsPage />;  
       case 'students':
         return <StudentsPage />;
       default:
