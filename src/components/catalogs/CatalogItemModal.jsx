@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 // --- RUTA CORREGIDA ---
-import Icon from '../../ui/Icon';
+import Icon from '../ui/Icon';
 
 const translations = {
     description: 'Descripción',

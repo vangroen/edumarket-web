@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '../ui/Icon';
-import CatalogItemModal from './academicRank/CatalogItemModal'; // Esta estaba bien si está en la misma carpeta
+import CatalogItemModal from './CatalogItemModal'; // Esta estaba bien si está en la misma carpeta
 import ConfirmDeleteModal from '../ConfirmDeleteModal';
 import { fetchData, createData, updateData, deleteData } from '../../services/api'; // Corregido para subir dos niveles
 
