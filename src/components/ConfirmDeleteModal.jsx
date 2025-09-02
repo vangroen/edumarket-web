@@ -1,7 +1,7 @@
 import React from 'react';
 import Icon from './ui/Icon';
 
-const ConfirmDeleteModal = ({ courseName, onClose, onConfirm }) => {
+const ConfirmDeleteModal = ({ itemType, itemName, onClose, onConfirm }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
       <div className="bg-dark-surface rounded-lg shadow-2xl w-full max-w-md p-8 m-4">
@@ -12,7 +12,7 @@ const ConfirmDeleteModal = ({ courseName, onClose, onConfirm }) => {
           <div>
             <h2 className="text-xl font-bold text-dark-text-primary">Confirmar Eliminación</h2>
             <p className="text-dark-text-secondary mt-2">
-              ¿Estás seguro de que quieres eliminar el curso <strong className="text-dark-text-primary font-semibold">{courseName}</strong>?
+              ¿Estás seguro de que quieres eliminar {itemType} <strong className="text-dark-text-primary font-semibold">{itemName}</strong>?
             </p>
           </div>
         </div>

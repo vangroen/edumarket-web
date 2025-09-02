@@ -152,7 +152,8 @@ const CatalogCrud = ({ catalogInfo, onBack }) => {
       )}
       {isDeleteModalOpen && (
         <ConfirmDeleteModal
-            courseName={deletingItem ? getNestedValue(deletingItem, mainDisplayField) : ''}
+            itemType="el registro"
+            itemName={deletingItem ? deletingItem[displayField] : ''}
             onClose={handleCloseDeleteModal}
             onConfirm={handleConfirmDelete}
         />

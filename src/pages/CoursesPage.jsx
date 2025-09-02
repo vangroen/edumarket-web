@@ -7,9 +7,9 @@ import { fetchData, updateData, createData, deleteData } from '../services/api';
 
 // --- (Componentes de Píldoras no cambian) ---
 const CourseTypePill = ({ type }) => {
-  const isEspecializacion = type.toLowerCase().includes('especialización');
-  const pillClasses = `px-3 py-1 text-xs font-semibold rounded-full capitalize ${isEspecializacion ? 'bg-purple-500/20 text-purple-300' : 'bg-blue-500/20 text-blue-300'}`;
-  return <span className={pillClasses}>{type}</span>;
+    const isEspecializacion = type.toLowerCase().includes('especialización');
+    const pillClasses = `px-3 py-1 text-xs font-semibold rounded-full capitalize ${isEspecializacion ? 'bg-purple-500/20 text-purple-300' : 'bg-blue-500/20 text-blue-300'}`;
+    return <span className={pillClasses}>{type}</span>;
 };
 const ModalityPill = ({ modality }) => {
     const isVirtual = modality.toLowerCase().includes('virtual');
@@ -73,7 +73,7 @@ const CoursesPage = () => {
             setIsOpeningModal(false);
         }
     };
-    
+
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(amount);
     };
@@ -100,7 +100,7 @@ const CoursesPage = () => {
             setError("No se pudo actualizar el curso. Revisa la consola para más detalles.");
         }
     };
-    
+
     const handleAddClick = () => {
         loadModalDataAndOpen(() => {
             setIsAddModalOpen(true);
@@ -180,40 +180,40 @@ const CoursesPage = () => {
                         {!isLoading && !error && (
                             <tbody className="divide-y divide-dark-border">
                                 {courses.map((course) => (
-                                // --- CAMBIO AQUÍ: Añadimos las clases para el efecto hover ---
-                                <tr key={course.id} className="hover:bg-slate-700/50 transition-colors duration-150">
-                                    <td className="px-6 py-4 text-sm font-medium text-dark-text-primary align-top">{course.name}</td>
-                                    <td className="px-6 py-4 text-sm align-top">
-                                    <CourseTypePill type={course.courseType.description} />
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-dark-text-primary align-top">
-                                    <div className="flex flex-col gap-y-2">
-                                        {course.institutions.map(({ institution }) => (
-                                        <div key={institution.id} className="truncate" title={institution.name}>{institution.name}</div>
-                                        ))}
-                                    </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top whitespace-nowrap">
-                                    <div className="flex flex-col gap-y-2">
-                                        {course.institutions.map(({ institution, price }) => (
-                                        <div key={institution.id}>{formatCurrency(price)}</div>
-                                        ))}
-                                    </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm align-top">
-                                        <ModalityPill modality={course.modality.description} />
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top">
-                                    <div className="flex items-center space-x-4">
-                                        <button onClick={() => handleEditClick(course)} disabled={isOpeningModal} className="hover:text-dark-text-primary disabled:text-slate-600 disabled:cursor-wait" title="Editar curso">
-                                        <Icon path="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" className="w-5 h-5" />
-                                        </button>
-                                        <button onClick={() => handleDeleteClick(course)} className="hover:text-red-500" title="Eliminar curso">
-                                        <Icon path="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.036-2.134H8.718c-1.126 0-2.037.955-2.037 2.134v.916m7.5 0a48.667 48.667 0 00-7.5 0" className="w-5 h-5" />
-                                        </button>
-                                    </div>
-                                    </td>
-                                </tr>
+                                    // --- CAMBIO AQUÍ: Añadimos las clases para el efecto hover ---
+                                    <tr key={course.id} className="hover:bg-slate-700/50 transition-colors duration-150">
+                                        <td className="px-6 py-4 text-sm font-medium text-dark-text-primary align-top">{course.name}</td>
+                                        <td className="px-6 py-4 text-sm align-top">
+                                            <CourseTypePill type={course.courseType.description} />
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-dark-text-primary align-top">
+                                            <div className="flex flex-col gap-y-2">
+                                                {course.institutions.map(({ institution }) => (
+                                                    <div key={institution.id} className="truncate" title={institution.name}>{institution.name}</div>
+                                                ))}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-dark-text-secondary align-top whitespace-nowrap">
+                                            <div className="flex flex-col gap-y-2">
+                                                {course.institutions.map(({ institution, price }) => (
+                                                    <div key={institution.id}>{formatCurrency(price)}</div>
+                                                ))}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm align-top">
+                                            <ModalityPill modality={course.modality.description} />
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-dark-text-secondary align-top">
+                                            <div className="flex items-center space-x-4">
+                                                <button onClick={() => handleEditClick(course)} disabled={isOpeningModal} className="hover:text-dark-text-primary disabled:text-slate-600 disabled:cursor-wait" title="Editar curso">
+                                                    <Icon path="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" className="w-5 h-5" />
+                                                </button>
+                                                <button onClick={() => handleDeleteClick(course)} className="hover:text-red-500" title="Eliminar curso">
+                                                    <Icon path="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.036-2.134H8.718c-1.126 0-2.037.955-2.037 2.134v.916m7.5 0a48.667 48.667 0 00-7.5 0" className="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 ))}
                             </tbody>
                         )}
@@ -228,7 +228,7 @@ const CoursesPage = () => {
             </div>
 
             {isEditModalOpen && (
-                <CourseEditModal 
+                <CourseEditModal
                     course={editingCourse}
                     onClose={handleCloseEditModal}
                     onSave={handleSaveChanges}
@@ -238,7 +238,7 @@ const CoursesPage = () => {
                 />
             )}
             {isAddModalOpen && (
-                <CourseAddModal 
+                <CourseAddModal
                     onClose={handleCloseAddModal}
                     onSave={handleCreateCourse}
                     courseTypes={courseTypes}
@@ -248,7 +248,8 @@ const CoursesPage = () => {
             )}
             {isDeleteModalOpen && (
                 <ConfirmDeleteModal
-                    courseName={deletingCourse?.name}
+                    itemType="el curso"
+                    itemName={deletingCourse?.name}
                     onClose={handleCloseDeleteModal}
                     onConfirm={handleConfirmDelete}
                 />

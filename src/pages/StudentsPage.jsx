@@ -3,6 +3,7 @@ import Icon from '../components/ui/Icon';
 import StudentAddModal from '../components/StudentAddModal';
 import StudentDetailsModal from '../components/StudentDetailModal';
 import StudentEditModal from '../components/StudentEditModal';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import { fetchData, createData, updateData, deleteData } from '../services/api';
 
 const StudentsPage = () => {
@@ -16,8 +17,8 @@ const StudentsPage = () => {
   const [editingStudent, setEditingStudent] = useState(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [deletingStudent, setDeletingStudent] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // 3. Nuevo estado para el modal de eliminar
+  const [deletingStudent, setDeletingStudent] = useState(null); // Guarda el estudiante a eliminar
 
   // Estados para los datos de los formularios
   const [catalogs, setCatalogs] = useState({
@@ -83,7 +84,7 @@ const StudentsPage = () => {
   const handleAddClick = () => {
     loadCatalogsAndOpen(() => setIsAddModalOpen(true));
   };
-
+  
   const handleCreateStudent = async (formData) => {
     try {
       const personPayload = {
@@ -156,22 +157,43 @@ const StudentsPage = () => {
     setSelectedStudent(student);
     setIsDetailsModalOpen(true);
   };
+  
+  const handleCloseDetailsModal = () => {
+      setIsDetailsModalOpen(false);
+      setSelectedStudent(null);
+  };
 
-  // ELIMINAR
+  // --- 4. NUEVOS MANEJADORES PARA LA ELIMINACIÓN ---
+  
+  // Abre el modal de confirmación
   const handleDeleteClick = (student) => {
     setDeletingStudent(student);
     setIsDeleteModalOpen(true);
   };
 
+  // Cierra el modal de confirmación
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setDeletingStudent(null);
+  };
+
+  // Ejecuta la eliminación en dos pasos si el usuario confirma
   const handleConfirmDelete = async () => {
     if (!deletingStudent) return;
     try {
+      setError(null);
+      // Paso 1: Eliminar el estudiante
       await deleteData(`/students/${deletingStudent.id}`);
-      // Asumiendo que el backend maneja la eliminación de la persona si es necesario
-      setIsDeleteModalOpen(false);
-      loadStudents();
+      
+      // Paso 2: Eliminar la persona asociada
+      await deleteData(`/person/${deletingStudent.person.id}`);
+
+      // Si todo fue exitoso:
+      handleCloseDeleteModal(); // Cierra el modal
+      loadStudents(); // Recarga la lista de estudiantes
+
     } catch (err) {
-      setError("No se pudo eliminar el estudiante.");
+      setError("No se pudo eliminar el estudiante. Inténtalo de nuevo.");
       console.error(err);
     }
   };
@@ -226,6 +248,7 @@ const StudentsPage = () => {
                       <button onClick={() => handleEditClick(student)} className="hover:text-dark-text-primary" title="Editar estudiante">
                         <Icon path="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" className="w-5 h-5" />
                       </button>
+                      {/* 5. Conectar el botón de eliminar con su manejador */}
                       <button onClick={() => handleDeleteClick(student)} className="hover:text-red-500" title="Eliminar estudiante">
                         <Icon path="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.036-2.134H8.718c-1.126 0-2.037.955-2.037 2.134v.916m7.5 0a48.667 48.667 0 00-7.5 0" className="w-5 h-5" />
                       </button>
@@ -253,8 +276,14 @@ const StudentsPage = () => {
       {isEditModalOpen && (
         <StudentEditModal student={editingStudent} onClose={() => setIsEditModalOpen(false)} onSave={handleUpdateStudent} catalogs={catalogs} />
       )}
+      {/* 6. Renderizado condicional del nuevo modal de confirmación */}
       {isDeleteModalOpen && (
-        <ConfirmDeleteModal courseName={`${deletingStudent.person.firstName} ${deletingStudent.person.lastName}`} onClose={() => setIsDeleteModalOpen(false)} onConfirm={handleConfirmDelete} />
+        <ConfirmDeleteModal
+          itemType="al estudiante"
+          itemName={deletingStudent ? `${deletingStudent.person.firstName} ${deletingStudent.person.lastName}` : ''}
+          onClose={handleCloseDeleteModal}
+          onConfirm={handleConfirmDelete}
+        />
       )}
     </div>
   );
