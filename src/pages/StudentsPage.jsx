@@ -1,122 +1,51 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '../components/ui/Icon';
-import StudentAddModal from '../components/StudentAddModal'; // 1. Importar el nuevo modal
+import StudentDetailsModal from '../components/StudentDetailModal'; // 1. Importar el nuevo modal
 import { fetchData, createData } from '../services/api';
-
-const StatusPill = ({ isActive }) => {
-  const pillClasses = `px-3 py-1 text-xs font-semibold rounded-full capitalize ${
-    isActive ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-400'
-  }`;
-  return <span className={pillClasses}>{isActive ? 'Activo' : 'Inactivo'}</span>;
-};
 
 const StudentsPage = () => {
   const [students, setStudents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Estados para el modal
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isModalDataLoaded, setIsModalDataLoaded] = useState(false);
-  const [isOpeningModal, setIsOpeningModal] = useState(false);
-
-  // Estado para guardar todos los catálogos necesarios para el formulario
-  const [catalogs, setCatalogs] = useState({
-    documentTypes: [],
-    professions: [],
-    institutions: [],
-    academicRanks: [],
-  });
-
-  const loadStudents = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await fetchData('/students');
-      setStudents(Array.isArray(data) ? data : []);
-    } catch (err) {
-      setError(err.message);
-      setStudents([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Estados para el modal de detalles
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   useEffect(() => {
+    const loadStudents = async () => {
+      setIsLoading(true);
+      try {
+        const data = await fetchData('/students');
+        setStudents(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setError(err.message);
+        setStudents([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
     loadStudents();
   }, []);
 
-  // Carga los catálogos necesarios para el modal de "Añadir"
-  const loadCatalogsForModal = async () => {
-    if (isModalDataLoaded) {
-      setIsAddModalOpen(true);
-      return;
-    }
-    setIsOpeningModal(true);
-    try {
-      const [docs, professions, institutions, ranks] = await Promise.all([
-        fetchData('/document-type'),
-        fetchData('/profession'),
-        fetchData('/institution'),
-        fetchData('/academic-rank'),
-      ]);
-      setCatalogs({
-        documentTypes: docs,
-        professions: professions,
-        institutions: institutions,
-        academicRanks: ranks,
-      });
-      setIsModalDataLoaded(true);
-      setIsAddModalOpen(true);
-    } catch (err) {
-      setError("No se pudieron cargar los datos para el formulario.");
-    } finally {
-      setIsOpeningModal(false);
-    }
+  // Funciones para manejar el modal de detalles
+  const handleViewDetails = (student) => {
+    setSelectedStudent(student);
+    setIsDetailsModalOpen(true);
   };
-  
-  // --- LÓGICA DE GUARDADO EN DOS PASOS ---
-  const handleCreateStudent = async (formData) => {
-    try {
-      // Paso 1: Crear la Persona
-      const personPayload = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        documentNumber: formData.documentNumber,
-        idDocumentType: parseInt(formData.idDocumentType, 10),
-      };
-      const newPerson = await createData('/person', personPayload);
 
-      // Paso 2: Usar el ID de la persona creada para crear el Estudiante
-      const studentPayload = {
-        idProfession: parseInt(formData.idProfession, 10),
-        idInstitution: parseInt(formData.idInstitution, 10),
-        idAcademicRank: parseInt(formData.idAcademicRank, 10),
-        idPerson: newPerson.id, // Usamos el ID de la respuesta anterior
-      };
-      await createData('/students', studentPayload);
-
-      // Si todo fue exitoso:
-      setIsAddModalOpen(false);
-      loadStudents(); // Recargar la tabla de estudiantes
-
-    } catch (err) {
-      setError("Ocurrió un error al crear el estudiante. Por favor, inténtalo de nuevo.");
-      console.error(err);
-    }
+  const handleCloseDetailsModal = () => {
+    setIsDetailsModalOpen(false);
+    setSelectedStudent(null);
   };
 
   return (
     <div>
+      {/* Encabezado de la página (sin cambios) */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8">
         <div>
           <h1 className="text-3xl font-bold text-dark-text-primary">Gestión de Estudiantes</h1>
-          <p className="text-dark-text-secondary mt-1">
-            Administra la información de los estudiantes.
-          </p>
+          <p className="text-dark-text-secondary mt-1">Administra la información de los estudiantes.</p>
         </div>
         <div className="flex items-center gap-4 mt-4 md:mt-0">
           <div className="relative">
@@ -129,13 +58,14 @@ const StudentsPage = () => {
               className="w-full bg-dark-surface border border-dark-border rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-brand-accent text-dark-text-primary"
             />
           </div>
-          <button onClick={loadCatalogsForModal} disabled={isOpeningModal} className="flex items-center justify-center px-4 py-2 bg-brand-accent text-white rounded-lg hover:bg-blue-600 font-semibold shadow transition-colors flex-shrink-0 disabled:bg-slate-500 disabled:cursor-wait">
-            {isOpeningModal ? (<Icon path="M16.023 9.348h4.992v-.001a10.987 10.987 0 00-2.3-5.842 10.987 10.987 0 00-5.843-2.3v4.992c0 .341.166.658.437.853l3.708 2.966c.27.218.632.245.92.062a.965.965 0 00.505-.921z" className="w-5 h-5 mr-2 animate-spin" />) : (<Icon path="M12 4.5v15m7.5-7.5h-15" className="w-5 h-5 mr-2" />)}
-            {isOpeningModal ? 'Cargando...' : 'Añadir Estudiante'}
+          <button className="flex items-center justify-center px-4 py-2 bg-brand-accent text-white rounded-lg hover:bg-blue-600 font-semibold shadow transition-colors flex-shrink-0">
+            <Icon path="M12 4.5v15m7.5-7.5h-15" className="w-5 h-5 mr-2" />
+            Añadir Estudiante
           </button>
         </div>
       </div>
 
+      {/* Tabla de Estudiantes Modificada */}
       <div className="bg-dark-surface rounded-lg shadow-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full">
@@ -145,7 +75,7 @@ const StudentsPage = () => {
                 <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Email</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Teléfono</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Documento</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Estado</th>
+                {/* Columna "Estado" eliminada */}
                 <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
@@ -156,11 +86,12 @@ const StudentsPage = () => {
                   <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap">{student.person.email}</td>
                   <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap">{student.person.phone}</td>
                   <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap">{student.person.documentNumber}</td>
-                  <td className="px-6 py-4 text-sm">
-                    <StatusPill isActive={student.person.active} />
-                  </td>
                   <td className="px-6 py-4 text-sm text-dark-text-secondary">
                     <div className="flex items-center space-x-4">
+                      {/* Nuevo botón para ver detalles */}
+                      <button onClick={() => handleViewDetails(student)} className="hover:text-dark-text-primary" title="Ver detalles">
+                        <Icon path="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM15 12a3 3 0 11-6 0 3 3 0 016 0z" className="w-5 h-5" />
+                      </button>
                       <button className="hover:text-dark-text-primary" title="Editar estudiante">
                         <Icon path="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" className="w-5 h-5" />
                       </button>
@@ -177,16 +108,17 @@ const StudentsPage = () => {
           {error && <p className="p-4 text-center text-red-400">{error}</p>}
           {!isLoading && !error && students.length === 0 && <p className="p-4 text-center text-dark-text-secondary">No se encontraron estudiantes.</p>}
         </div>
+
         <div className="flex justify-between items-center p-4 text-sm text-dark-text-secondary">
           <p>Mostrando {students.length} de {students.length} estudiantes</p>
         </div>
       </div>
 
-      {isAddModalOpen && (
-        <StudentAddModal 
-            onClose={() => setIsAddModalOpen(false)}
-            onSave={handleCreateStudent}
-            catalogs={catalogs}
+      {/* Renderizado condicional del nuevo modal */}
+      {isDetailsModalOpen && (
+        <StudentDetailsModal
+          student={selectedStudent}
+          onClose={handleCloseDetailsModal}
         />
       )}
     </div>
