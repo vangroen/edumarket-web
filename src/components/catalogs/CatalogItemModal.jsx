@@ -2,24 +2,76 @@ import React, { useState, useEffect } from 'react';
 // --- CORRECCIÓN DE RUTA ---
 import Icon from '../ui/Icon';
 
-const CatalogItemModal = ({ item, onClose, onSave, catalogTitle, displayField }) => {
-  const [value, setValue] = useState('');
+const CatalogItemModal = ({ item, onClose, onSave, catalogInfo, selectOptions }) => {
+  const [formData, setFormData] = useState({});
 
   useEffect(() => {
-    // Si estamos editando, usamos el displayField para obtener el valor correcto
-    if (item) {
-      setValue(item[displayField] || '');
+    if (catalogInfo?.fields) {
+      const initialData = catalogInfo.fields.reduce((acc, field) => {
+        acc[field.name] = item?.[field.name] ?? '';
+        return acc;
+      }, {});
+      setFormData(initialData);
     }
-  }, [item, displayField]);
+  }, [item, catalogInfo]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Devolvemos un objeto con el campo dinámico
-    onSave({ ...item, [displayField]: value });
+    // Combinamos el item original (para mantener el id) con los datos del formulario
+    onSave({ ...item, ...formData });
   };
 
+  if (!catalogInfo?.fields) {
+    return null;
+  }
+
+  const { title: catalogTitle, fields } = catalogInfo;
   const modalTitle = item ? `Editar ${catalogTitle}` : `Añadir Nuevo ${catalogTitle}`;
-  const labelText = displayField.charAt(0).toUpperCase() + displayField.slice(1);
+
+  const renderField = (field) => {
+    const labelText = field.label || (field.name.charAt(0).toUpperCase() + field.name.slice(1));
+
+    return (
+      <div key={field.name} className="mb-4">
+        <label htmlFor={field.name} className="block text-sm font-medium text-dark-text-secondary mb-2">
+          {labelText}
+        </label>
+        {field.type === 'select' ? (
+          <select
+            id={field.name}
+            name={field.name}
+            value={formData[field.name] || ''}
+            onChange={handleChange}
+            className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-brand-accent text-dark-text-primary"
+            required={field.required}
+          >
+            <option value="">Seleccione una opción</option>
+            {selectOptions?.[field.name]?.map(option => (
+              <option key={option.id} value={option.id}>
+                {option[field.optionLabel] || option.name}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <input
+            type={field.type || 'text'}
+            id={field.name}
+            name={field.name}
+            value={formData[field.name] || ''}
+            onChange={handleChange}
+            className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-brand-accent text-dark-text-primary"
+            required={field.required}
+            autoFocus={fields.indexOf(field) === 0}
+          />
+        )}
+      </div>
+    );
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
@@ -31,22 +83,8 @@ const CatalogItemModal = ({ item, onClose, onSave, catalogTitle, displayField })
           </button>
         </div>
         <form onSubmit={handleSubmit}>
-          <div className="mb-6">
-            <label htmlFor="catalog-item-value" className="block text-sm font-medium text-dark-text-secondary mb-2">
-              {labelText}
-            </label>
-            <input
-              type="text"
-              id="catalog-item-value"
-              name="value"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-brand-accent text-dark-text-primary"
-              required
-              autoFocus
-            />
-          </div>
-          <div className="flex justify-end gap-4">
+          {fields.map(renderField)}
+          <div className="flex justify-end gap-4 mt-6">
             <button
               type="button"
               onClick={onClose}

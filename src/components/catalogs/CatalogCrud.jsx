@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Icon from '../ui/Icon';
-import CatalogItemModal from './CatalogItemModal'; // Esta estaba bien si está en la misma carpeta
+import Icon from '../ui/Icon'; // Corregido para subir un nivel
+import CatalogItemModal from '../catalogs/CatalogItemModal'; // Esta estaba bien si está en la misma carpeta
 import ConfirmDeleteModal from '../ConfirmDeleteModal';
 import { fetchData, createData, updateData, deleteData } from '../../services/api'; // Corregido para subir dos niveles
 
@@ -14,6 +14,7 @@ const CatalogCrud = ({ catalogInfo, onBack }) => {
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectOptions, setSelectOptions] = useState({});
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
@@ -43,7 +44,26 @@ const CatalogCrud = ({ catalogInfo, onBack }) => {
 
   useEffect(() => {
     loadData();
-  }, [endpoint]);
+  }, [endpoint, title]);
+
+  useEffect(() => {
+    const loadSelectOptions = async () => {
+      if (!fields) return;
+      try {
+        const options = {};
+        const selectFields = fields.filter(f => f.type === 'select' && f.optionsEndpoint);
+        
+        for (const field of selectFields) {
+          const data = await fetchData(field.optionsEndpoint);
+          options[field.name] = data;
+        }
+        setSelectOptions(options);
+      } catch (err) {
+        setError(prev => prev || `No se pudieron cargar las opciones de selección.`);
+      }
+    };
+    loadSelectOptions();
+  }, [fields]);
 
   const handleOpenModal = (item = null) => {
     setEditingItem(item);
