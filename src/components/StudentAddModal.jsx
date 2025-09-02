@@ -18,15 +18,9 @@ const StudentAddModal = ({ onClose, onSave, catalogs }) => {
     idAcademicRank: '',
   });
 
-  // Pre-seleccionar el primer valor de los catálogos si existen
+  // El estado inicial para los selects es vacío para mostrar el placeholder.
   useEffect(() => {
-    setFormData(prev => ({
-      ...prev,
-      idDocumentType: catalogs.documentTypes?.[0]?.id || '',
-      idProfession: catalogs.professions?.[0]?.id || '',
-      idInstitution: catalogs.institutions?.[0]?.id || '',
-      idAcademicRank: catalogs.academicRanks?.[0]?.id || '',
-    }));
+    // No se realiza ninguna acción para mantener los selects vacíos por defecto.
   }, [catalogs]);
 
   const handleChange = (e) => {
@@ -49,7 +43,7 @@ const StudentAddModal = ({ onClose, onSave, catalogs }) => {
           </button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Sección de Datos Personales */}
+          {/* Sección de Datos Personales (sin cambios) */}
           <div>
             <h3 className="text-lg font-medium text-dark-text-primary mb-4 border-b border-dark-border pb-2">Datos Personales</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -58,26 +52,36 @@ const StudentAddModal = ({ onClose, onSave, catalogs }) => {
               <input name="email" type="email" value={formData.email} onChange={handleChange} placeholder="Email" required className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary" />
               <input name="phone" value={formData.phone} onChange={handleChange} placeholder="Teléfono" required className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary" />
               <input name="address" value={formData.address} onChange={handleChange} placeholder="Dirección" required className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary md:col-span-2" />
-              <select name="idDocumentType" value={formData.idDocumentType} onChange={handleChange} className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary">
+              <select name="idDocumentType" value={formData.idDocumentType} onChange={handleChange} required className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary">
+                <option value="" disabled>Seleccione tipo de documento</option>
                 {catalogs.documentTypes?.map(type => <option key={type.id} value={type.id}>{type.description}</option>)}
               </select>
               <input name="documentNumber" value={formData.documentNumber} onChange={handleChange} placeholder="Número de Documento" required className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary" />
             </div>
           </div>
 
-          {/* Sección de Datos Académicos */}
+          {/* --- SECCIÓN DE DATOS ACADÉMICOS (MODIFICADA) --- */}
           <div>
             <h3 className="text-lg font-medium text-dark-text-primary mb-4 border-b border-dark-border pb-2">Datos Académicos</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <select name="idAcademicRank" value={formData.idAcademicRank} onChange={handleChange} className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary">
+            <div className="flex flex-col gap-4">
+              {/* Fila 1: Rango y Profesión */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <select name="idAcademicRank" value={formData.idAcademicRank} onChange={handleChange} required className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary">
+                    <option value="" disabled>Seleccione rango académico</option>
                     {catalogs.academicRanks?.map(rank => <option key={rank.id} value={rank.id}>{rank.description}</option>)}
                 </select>
-                <select name="idInstitution" value={formData.idInstitution} onChange={handleChange} className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary">
-                    {catalogs.institutions?.map(inst => <option key={inst.id} value={inst.id}>{inst.name}</option>)}
-                </select>
-                <select name="idProfession" value={formData.idProfession} onChange={handleChange} className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary">
+                <select name="idProfession" value={formData.idProfession} onChange={handleChange} required className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary">
+                    <option value="" disabled>Seleccione profesión</option>
                     {catalogs.professions?.map(prof => <option key={prof.id} value={prof.id}>{prof.name}</option>)}
                 </select>
+              </div>
+              {/* Fila 2: Institución */}
+              <div>
+                <select name="idInstitution" value={formData.idInstitution} onChange={handleChange} required className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary">
+                    <option value="" disabled>Seleccione Institución</option>
+                    {catalogs.institutions?.map(inst => <option key={inst.id} value={inst.id}>{inst.name}</option>)}
+                </select>
+              </div>
             </div>
           </div>
           
