@@ -3,75 +3,30 @@ import React, { useState, useEffect } from 'react';
 import Icon from '../ui/Icon';
 
 const CatalogItemModal = ({ item, onClose, onSave, catalogInfo, selectOptions }) => {
+  const { title, fields } = catalogInfo;
   const [formData, setFormData] = useState({});
 
+  // Inicializar el estado del formulario
   useEffect(() => {
-    if (catalogInfo?.fields) {
-      const initialData = catalogInfo.fields.reduce((acc, field) => {
-        acc[field.name] = item?.[field.name] ?? '';
-        return acc;
-      }, {});
-      setFormData(initialData);
-    }
-  }, [item, catalogInfo]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Combinamos el item original (para mantener el id) con los datos del formulario
-    onSave({ ...item, ...formData });
-  };
-
-  if (!catalogInfo?.fields) {
-    return null;
-  }
-
-  const { title: catalogTitle, fields } = catalogInfo;
-  const modalTitle = item ? `Editar ${catalogTitle}` : `Añadir Nuevo ${catalogTitle}`;
-
-  const renderField = (field) => {
-    const labelText = field.label || (field.name.charAt(0).toUpperCase() + field.name.slice(1));
-
-    return (
-      <div key={field.name} className="mb-4">
-        <label htmlFor={field.name} className="block text-sm font-medium text-dark-text-secondary mb-2">
-          {labelText}
-        </label>
-        {field.type === 'select' ? (
-          <select
-            id={field.name}
-            name={field.name}
-            value={formData[field.name] || ''}
-            onChange={handleChange}
-            className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-brand-accent text-dark-text-primary"
-            required={field.required}
-          >
-            <option value="">Seleccione una opción</option>
-            {selectOptions?.[field.name]?.map(option => (
-              <option key={option.id} value={option.id}>
-                {option[field.optionLabel] || option.name}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <input
-            type={field.type || 'text'}
-            id={field.name}
-            name={field.name}
-            value={formData[field.name] || ''}
-            onChange={handleChange}
-            className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-brand-accent text-dark-text-primary"
-            required={field.required}
-            autoFocus={fields.indexOf(field) === 0}
-          />
-        )}
-      </div>
-    );
-  };
+    const initialState = {};
+    fields.forEach(field => {
+      const fieldValue = item ? (field.type === 'select' ? item[field.name.replace('id', '').toLowerCase()]?.id : item[field.name]) : '';
+      initialState[field.name] = fieldValue || '';
+    });
+    setFormData(initialState);
+  }, [item, fields]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave({ ...item, ...formData });
+  };
+
+  const modalTitle = item ? `Editar ${title}` : `Añadir Nuevo ${title}`;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
@@ -82,22 +37,42 @@ const CatalogItemModal = ({ item, onClose, onSave, catalogInfo, selectOptions })
             <Icon path="M6 18L18 6M6 6l12 12" className="w-6 h-6" />
           </button>
         </div>
-        <form onSubmit={handleSubmit}>
-          {fields.map(renderField)}
-          <div className="flex justify-end gap-4 mt-6">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 font-semibold transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2 bg-brand-accent text-white rounded-lg hover:bg-blue-600 font-semibold shadow transition-colors"
-            >
-              Guardar
-            </button>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {fields.map(field => (
+            <div key={field.name}>
+              <label htmlFor={field.name} className="block text-sm font-medium text-dark-text-secondary mb-2">
+                {field.label}
+              </label>
+              {field.type === 'text' ? (
+                <input
+                  type="text"
+                  id={field.name}
+                  name={field.name}
+                  value={formData[field.name] || ''}
+                  onChange={handleChange}
+                  className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary"
+                  required
+                />
+              ) : (
+                <select
+                  id={field.name}
+                  name={field.name}
+                  value={formData[field.name] || ''}
+                  onChange={handleChange}
+                  required
+                  className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary"
+                >
+                  <option value="" disabled>Seleccione una opción</option>
+                  {selectOptions[field.name]?.map(option => (
+                    <option key={option.id} value={option.id}>{option.description || option.name}</option>
+                  ))}
+                </select>
+              )}
+            </div>
+          ))}
+          <div className="flex justify-end gap-4 pt-4">
+            <button type="button" onClick={onClose} className="px-6 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700">Cancelar</button>
+            <button type="submit" className="px-6 py-2 bg-brand-accent text-white rounded-lg hover:bg-blue-600">Guardar</button>
           </div>
         </form>
       </div>

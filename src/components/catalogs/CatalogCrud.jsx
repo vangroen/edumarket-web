@@ -4,30 +4,20 @@ import CatalogItemModal from '../catalogs/CatalogItemModal'; // Esta estaba bien
 import ConfirmDeleteModal from '../ConfirmDeleteModal';
 import { fetchData, createData, updateData, deleteData } from '../../services/api'; // Corregido para subir dos niveles
 
-const translations = {
-  description: 'Descripción',
-  status: 'Estado',
-  name: 'Nombre',
-};
-
 const CatalogCrud = ({ catalogInfo, onBack }) => {
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectOptions, setSelectOptions] = useState({});
 
+  // Estados para modales
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingItem, setDeletingItem] = useState(null);
+  const [selectOptions, setSelectOptions] = useState({});
 
   const { title, endpoint, fields, displayColumns } = catalogInfo;
   const mainDisplayField = displayColumns ? displayColumns[0].field : fields[0].name;
-
-  const getTranslatedText = (field) => {
-    const defaultText = field.charAt(0).toUpperCase() + field.slice(1);
-    return translations[field] || defaultText;
-  };
 
   const loadData = async () => {
     setIsLoading(true);
@@ -35,6 +25,13 @@ const CatalogCrud = ({ catalogInfo, onBack }) => {
     try {
       const data = await fetchData(endpoint);
       setItems(data);
+
+      for (const field of fields) {
+        if (field.type === 'select') {
+          const options = await fetchData(field.endpoint);
+          setSelectOptions(prev => ({ ...prev, [field.name]: options }));
+        }
+      }
     } catch (err) {
       setError(`No se pudieron cargar los datos para ${title}.`);
     } finally {
@@ -44,26 +41,7 @@ const CatalogCrud = ({ catalogInfo, onBack }) => {
 
   useEffect(() => {
     loadData();
-  }, [endpoint, title]);
-
-  useEffect(() => {
-    const loadSelectOptions = async () => {
-      if (!fields) return;
-      try {
-        const options = {};
-        const selectFields = fields.filter(f => f.type === 'select' && f.optionsEndpoint);
-        
-        for (const field of selectFields) {
-          const data = await fetchData(field.optionsEndpoint);
-          options[field.name] = data;
-        }
-        setSelectOptions(options);
-      } catch (err) {
-        setError(prev => prev || `No se pudieron cargar las opciones de selección.`);
-      }
-    };
-    loadSelectOptions();
-  }, [fields]);
+  }, [endpoint]);
 
   const handleOpenModal = (item = null) => {
     setEditingItem(item);
@@ -115,7 +93,6 @@ const CatalogCrud = ({ catalogInfo, onBack }) => {
       }
   };
 
-  // Función para obtener valores de objetos anidados (ej: 'institutionType.description')
   const getNestedValue = (obj, path) => path.split('.').reduce((acc, part) => acc && acc[part], obj);
 
   return (
@@ -140,39 +117,33 @@ const CatalogCrud = ({ catalogInfo, onBack }) => {
       </div>
 
       <div className="bg-dark-surface rounded-lg shadow-lg overflow-hidden">
-        {/* --- CABECERA ACTUALIZADA --- */}
-        <div className="flex bg-slate-800 border-b border-dark-border py-3 px-6">
-            <div className="flex-1 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">
-                {(displayColumns || [{ header: fields.length > 1 ? fields[0].label : getTranslatedText(fields[0].name) }]).map(col => col.header).join(' / ')}
-            </div>
-            <div className="w-24 text-right text-sm font-semibold text-dark-text-primary uppercase tracking-wider">
-                Acciones
-            </div>
-        </div>
-
-        {/* --- LISTA DE ITEMS ACTUALIZADA --- */}
-        <div className="divide-y divide-dark-border">
-            {!isLoading && !error && items.map((item) => (
-                <div key={item.id} className="flex items-center p-6 bg-dark-surface hover:bg-slate-700/50 transition-colors duration-150">
-                    <div className="flex-1 space-x-4">
-                      {(displayColumns || [{ field: fields[0].name }]).map(col => (
-                        <span key={col.field} className="font-medium text-dark-text-primary">
-                          {getNestedValue(item, col.field)}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex items-center space-x-4 w-24 justify-end flex-shrink-0">
-                        <button onClick={() => handleOpenModal(item)} className="text-dark-text-secondary hover:text-dark-text-primary" title="Editar">
-                            <Icon path="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" className="w-5 h-5" />
-                        </button>
-                        <button onClick={() => handleDeleteClick(item)} className="text-dark-text-secondary hover:text-red-500" title="Eliminar">
-                            <Icon path="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.036-2.134H8.718c-1.126 0-2.037.955-2.037 2.134v.916m7.5 0a48.667 48.667 0 00-7.5 0" className="w-5 h-5" />
-                        </button>
-                    </div>
-                </div>
-            ))}
-        </div>
-
+          <table className="min-w-full">
+            <thead className="bg-slate-800">
+                <tr>
+                    {(displayColumns || [{ header: 'Descripción', field: fields[0].name }]).map(col => (
+                        <th key={col.header} className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">{col.header}</th>
+                    ))}
+                    <th className="px-6 py-4 text-right text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Acciones</th>
+                </tr>
+            </thead>
+            <tbody className="divide-y divide-dark-border">
+                {!isLoading && !error && items.map((item) => (
+                    <tr key={item.id} className="hover:bg-slate-700/50 transition-colors duration-150">
+                        {(displayColumns || [{ field: fields[0].name }]).map(col => (
+                            <td key={col.field} className="px-6 py-4 text-sm font-medium text-dark-text-primary whitespace-nowrap">
+                                {getNestedValue(item, col.field)}
+                            </td>
+                        ))}
+                        <td className="px-6 py-4 text-sm text-dark-text-secondary">
+                            <div className="flex items-center justify-end space-x-4">
+                                <button onClick={() => handleOpenModal(item)} className="hover:text-dark-text-primary" title="Editar"><Icon path="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" className="w-5 h-5" /></button>
+                                <button onClick={() => handleDeleteClick(item)} className="hover:text-red-500" title="Eliminar"><Icon path="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.036-2.134H8.718c-1.126 0-2.037.955-2.037 2.134v.916m7.5 0a48.667 48.667 0 00-7.5 0" className="w-5 h-5" /></button>
+                            </div>
+                        </td>
+                    </tr>
+                ))}
+            </tbody>
+          </table>
         {isLoading && <p className="p-4 text-center text-dark-text-secondary">Cargando...</p>}
         {error && <p className="p-4 text-center text-red-400">{error}</p>}
         {!isLoading && !error && items.length === 0 && <p className="p-4 text-center text-dark-text-secondary">No se encontraron registros.</p>}

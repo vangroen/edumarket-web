@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import Icon from '../components/ui/Icon';
 import CatalogCrud from '../components/catalogs/CatalogCrud'; // Importamos el componente CRUD
 
+// Lista de catálogos actualizada con una estructura de "fields" para ser más flexible
 const catalogItems = [
-  // Catálogos simples con un solo campo
+  // Catálogos simples (un solo campo de texto)
   { key: 'academicRank', title: 'Grado Académico', endpoint: '/academic-rank', fields: [{ name: 'description', label: 'Descripción', type: 'text' }] },
   { key: 'conceptType', title: 'Tipo de Concepto', endpoint: '/concept-type', fields: [{ name: 'description', label: 'Descripción', type: 'text' }] },
   { key: 'courseType', title: 'Tipo de Curso', endpoint: '/course-type', fields: [{ name: 'description', label: 'Descripción', type: 'text' }] },
@@ -14,14 +15,14 @@ const catalogItems = [
   { key: 'profession', title: 'Profesión', endpoint: '/profession', fields: [{ name: 'name', label: 'Nombre', type: 'text' }] },
   { key: 'institutionType', title: 'Tipo de Institución', endpoint: '/institution-type', fields: [{ name: 'description', label: 'Descripción', type: 'text' }] },
 
-  // --- CATÁLOGO COMPLEJO ---
+  // --- CATÁLOGO COMPLEJO: INSTITUCIÓN ---
   { 
     key: 'institution', 
     title: 'Institución', 
     endpoint: '/institution', 
-    // Le decimos que tiene dos campos para el formulario
+    // Le decimos que el formulario tiene dos campos
     fields: [
-      { name: 'name', label: 'Nombre', type: 'text' },
+      { name: 'name', label: 'Nombre de la Institución', type: 'text' },
       // Y un campo de tipo 'select' que necesita cargar datos de otro endpoint
       { name: 'idInstitutionType', label: 'Tipo de Institución', type: 'select', endpoint: '/institution-type' }
     ],
