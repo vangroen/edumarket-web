@@ -12,7 +12,8 @@ const navItems = [
 
 const Sidebar = ({ activeView, setActiveView }) => {
   return (
-    <aside className="w-64 bg-dark-surface flex-shrink-0 flex flex-col">
+    // --- CAMBIO AQUÍ: de w-64 a w-52 ---
+    <aside className="w-52 bg-dark-surface flex-shrink-0 flex flex-col">
       <div className="flex items-center p-4 border-b border-dark-border h-16">
         <Icon path="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" className="w-8 h-8 text-dark-text-primary mr-2" />
         <h1 className="text-xl font-bold text-dark-text-primary">CTCSE</h1>
