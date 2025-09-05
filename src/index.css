@@ -5,3 +5,27 @@
 body {
   @apply bg-dark-bg text-dark-text-primary antialiased;
 }
+
+/* Estilos personalizados para el scrollbar (Versión Gruesa y de Alto Contraste) */
+::-webkit-scrollbar {
+  width: 12px; /* Ancho del scrollbar (aumentado de 8px a 12px) */
+  height: 12px; /* Alto para scrollbars horizontales */
+}
+
+/* Fondo de la barra de scroll (la pista) */
+::-webkit-scrollbar-track {
+  background: #1e293b; /* Fondo oscuro 'dark-surface' */
+  border-radius: 10px;
+}
+
+/* El "pulgar" o la parte que se mueve del scroll */
+::-webkit-scrollbar-thumb {
+  background-color: #94a3b8; /* Color del texto secundario para alto contraste */
+  border-radius: 10px;
+  border: 3px solid #1e293b; /* Borde aumentado para mantener el efecto flotante */
+}
+
+/* Estilo del pulgar al pasar el cursor por encima */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #f8fafc; /* Color del texto primario para máxima visibilidad */
+}
