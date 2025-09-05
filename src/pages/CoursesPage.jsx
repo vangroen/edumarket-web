@@ -170,22 +170,19 @@ const CoursesPage = () => {
                         <thead className="border-b border-dark-border">
                             <tr>
                                 <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Nombre del Curso</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Tipo</th>
                                 <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Instituciones</th>
+                                <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Duración</th>
                                 <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Costo</th>
                                 <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Modalidad</th>
+                                <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Tipo</th>
                                 <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Acciones</th>
                             </tr>
                         </thead>
                         {!isLoading && !error && (
                             <tbody className="divide-y divide-dark-border">
                                 {courses.map((course) => (
-                                    // --- CAMBIO AQUÍ: Añadimos las clases para el efecto hover ---
                                     <tr key={course.id} className="hover:bg-slate-700/50 transition-colors duration-150">
                                         <td className="px-6 py-4 text-sm font-medium text-dark-text-primary align-top">{course.name}</td>
-                                        <td className="px-6 py-4 text-sm align-top">
-                                            <CourseTypePill type={course.courseType.description} />
-                                        </td>
                                         <td className="px-6 py-4 text-sm text-dark-text-primary align-top">
                                             <div className="flex flex-col gap-y-2">
                                                 {course.institutions.map(({ institution }) => (
@@ -195,10 +192,20 @@ const CoursesPage = () => {
                                         </td>
                                         <td className="px-6 py-4 text-sm text-dark-text-secondary align-top whitespace-nowrap">
                                             <div className="flex flex-col gap-y-2">
+                                                {course.institutions.map(({ institution, durationInMonths }) => (
+                                                    <div key={institution.id}>{durationInMonths} meses</div>
+                                                ))}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-dark-text-secondary align-top whitespace-nowrap">
+                                            <div className="flex flex-col gap-y-2">
                                                 {course.institutions.map(({ institution, price }) => (
                                                     <div key={institution.id}>{formatCurrency(price)}</div>
                                                 ))}
                                             </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm align-top">
+                                            <CourseTypePill type={course.courseType.description} />
                                         </td>
                                         <td className="px-6 py-4 text-sm align-top">
                                             <ModalityPill modality={course.modality.description} />
