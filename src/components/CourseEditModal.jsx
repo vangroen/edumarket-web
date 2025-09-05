@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Icon from './ui/Icon';
 
 const CourseEditModal = ({ course, onClose, onSave, courseTypes, modalities, allInstitutions }) => {
-  // La lógica para inicializar el estado con los datos del curso a editar es correcta y se mantiene
   const [formData, setFormData] = useState({
     name: '',
     idCourseType: '',
@@ -19,11 +18,11 @@ const CourseEditModal = ({ course, onClose, onSave, courseTypes, modalities, all
         institutions: course.institutions?.map(inst => ({
           institution: { id: inst.institution.id },
           price: inst.price.toString(),
+          durationInMonths: inst.durationInMonths.toString(),
         })) || [],
       });
     }
   }, [course]);
-
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,11 +33,10 @@ const CourseEditModal = ({ course, onClose, onSave, courseTypes, modalities, all
     setFormData(prev => {
       const isSelected = prev.institutions.some(inst => inst.institution.id === institutionId);
       let newInstitutions;
-
       if (isSelected) {
         newInstitutions = prev.institutions.filter(inst => inst.institution.id !== institutionId);
       } else {
-        newInstitutions = [...prev.institutions, { institution: { id: institutionId }, price: '0.00' }];
+        newInstitutions = [...prev.institutions, { institution: { id: institutionId }, price: '0.00', durationInMonths: '0' }];
       }
       return { ...prev, institutions: newInstitutions };
     });
@@ -50,6 +48,17 @@ const CourseEditModal = ({ course, onClose, onSave, courseTypes, modalities, all
         ...prev,
         institutions: prev.institutions.map(inst =>
           inst.institution.id === institutionId ? { ...inst, price: newPrice } : inst
+        )
+      }));
+    }
+  };
+
+  const handleDurationChange = (institutionId, newDuration) => {
+    if (/^[0-9]*$/.test(newDuration)) {
+      setFormData(prev => ({
+        ...prev,
+        institutions: prev.institutions.map(inst =>
+          inst.institution.id === institutionId ? { ...inst, durationInMonths: newDuration } : inst
         )
       }));
     }
@@ -68,6 +77,7 @@ const CourseEditModal = ({ course, onClose, onSave, courseTypes, modalities, all
       institutions: formData.institutions.map(inst => ({
         ...inst,
         price: parseFloat(inst.price) || 0,
+        durationInMonths: parseInt(inst.durationInMonths, 10) || 0,
       })),
     };
     onSave(submissionData);
@@ -75,8 +85,7 @@ const CourseEditModal = ({ course, onClose, onSave, courseTypes, modalities, all
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-      {/* CAMBIO: Aumentamos el ancho máximo para que coincida con el modal de añadir */}
-      <div className="bg-dark-surface rounded-lg shadow-2xl w-full max-w-2xl p-8 m-4">
+      <div className="bg-dark-surface rounded-lg shadow-2xl w-full max-w-3xl p-8 m-4">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-dark-text-primary">Editar Curso</h2>
           <button onClick={onClose} className="text-dark-text-secondary hover:text-dark-text-primary">
@@ -84,7 +93,6 @@ const CourseEditModal = ({ course, onClose, onSave, courseTypes, modalities, all
           </button>
         </div>
 
-        {/* CAMBIO: Adoptamos la misma estructura de formulario que CourseAddModal */}
         <form onSubmit={handleSubmit}>
           <div className="space-y-6">
 
@@ -131,18 +139,18 @@ const CourseEditModal = ({ course, onClose, onSave, courseTypes, modalities, all
               </div>
             </fieldset>
 
-            {/* --- SECCIÓN 2: INSTITUCIONES Y PRECIOS --- */}
+            {/* --- SECCIÓN 2: INSTITUCIONES, PRECIOS Y DURACIÓN --- */}
             <fieldset>
               <legend className="text-lg font-semibold text-dark-text-primary mb-3 pb-2 border-b border-dark-border w-full">
-                Instituciones y Precios
+                Instituciones, Precios y Duración
               </legend>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 pt-2">
                 {allInstitutions.map((institution) => {
                   const isSelected = formData.institutions.some(i => i.institution.id === institution.id);
-                  const currentPrice = isSelected ? formData.institutions.find(i => i.institution.id === institution.id).price : '';
+                  const currentInstitution = isSelected ? formData.institutions.find(i => i.institution.id === institution.id) : {};
 
                   return (
-                    <div key={institution.id} className="flex items-center justify-between">
+                    <div key={institution.id} className="flex items-center justify-between gap-2">
                       <label htmlFor={`inst-edit-${institution.id}`} className="flex-grow flex items-center gap-3 text-dark-text-secondary cursor-pointer">
                         <input
                           type="checkbox"
@@ -154,17 +162,30 @@ const CourseEditModal = ({ course, onClose, onSave, courseTypes, modalities, all
                         {institution.name}
                       </label>
                       {isSelected && (
-                        <input
-                          type="text"
-                          inputMode="decimal"
-                          pattern="[0-9]*[.]?[0-9]*"
-                          placeholder="S/ 0.00"
-                          value={currentPrice}
-                          onChange={(e) => handlePriceChange(institution.id, e.target.value)}
-                          className="w-28 bg-dark-bg border border-dark-border rounded-lg py-1 px-3 text-right focus:outline-none focus:ring-2 focus:ring-brand-accent text-dark-text-primary"
-                          required
-                          onClick={(e) => e.stopPropagation()}
-                        />
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            pattern="[0-9]*[.]?[0-9]*"
+                            placeholder="S/ 0.00"
+                            value={currentInstitution.price}
+                            onChange={(e) => handlePriceChange(institution.id, e.target.value)}
+                            className="w-24 bg-dark-bg border border-dark-border rounded-lg py-1 px-3 text-right focus:outline-none focus:ring-2 focus:ring-brand-accent text-dark-text-primary"
+                            required
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            placeholder="Meses"
+                            value={currentInstitution.durationInMonths}
+                            onChange={(e) => handleDurationChange(institution.id, e.target.value)}
+                            className="w-20 bg-dark-bg border border-dark-border rounded-lg py-1 px-3 text-right focus:outline-none focus:ring-2 focus:ring-brand-accent text-dark-text-primary"
+                            required
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
                       )}
                     </div>
                   );
