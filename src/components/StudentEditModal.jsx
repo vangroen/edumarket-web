@@ -23,7 +23,6 @@ const StudentEditModal = ({ student, onClose, onSave, catalogs }) => {
     idDocumentType: '', idProfession: '', idInstitution: '', idAcademicRank: '',
   });
 
-  // --- INICIO: Lógica para el buscador de Institución ---
   const [institutionSearch, setInstitutionSearch] = useState('');
   const [isSearchActive, setIsSearchActive] = useState(false);
   const searchInputRef = useRef(null);
@@ -41,7 +40,6 @@ const StudentEditModal = ({ student, onClose, onSave, catalogs }) => {
     }
   }, [isSearchActive, institutionSearch]);
   
-  // Carga los datos del estudiante en el formulario cuando el modal se abre
   useEffect(() => {
     if (student) {
       setFormData({
@@ -56,17 +54,18 @@ const StudentEditModal = ({ student, onClose, onSave, catalogs }) => {
         idInstitution: student.institution?.id || '',
         idAcademicRank: student.academicRank?.id || '',
       });
-      // Inicializa el valor del campo de búsqueda si hay una institución
       if (student.institution) {
         setInstitutionSearch(student.institution.name || '');
+      } else {
+        setInstitutionSearch('');
       }
     }
   }, [student]);
 
   const searchResults = useMemo(() => {
-    // No muestres resultados si el texto de búsqueda coincide exactamente con una selección (para evitar que se abra al cargar)
     const selectedName = catalogs.institutions?.find(i => i.id === formData.idInstitution)?.name;
-    if (!institutionSearch || institutionSearch === selectedName) return [];
+    if (!institutionSearch) return []; // Si no hay búsqueda, no hay resultados
+    if (institutionSearch === selectedName && formData.idInstitution) return []; // Si el texto coincide con el seleccionado y ya hay uno, no mostrar resultados de búsqueda
     
     return catalogs.institutions?.filter(inst =>
       inst.name.toLowerCase().includes(institutionSearch.toLowerCase())
@@ -81,12 +80,11 @@ const StudentEditModal = ({ student, onClose, onSave, catalogs }) => {
 
   const handleSearchChange = (e) => {
     setInstitutionSearch(e.target.value);
-    // Si el usuario empieza a escribir, deseleccionamos la institución actual
+    // Si el usuario empieza a escribir después de tener una institución seleccionada, deselecciónala
     if (formData.idInstitution) {
       setFormData(prev => ({...prev, idInstitution: ''}));
     }
   };
-  // --- FIN: Lógica del buscador ---
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -109,7 +107,7 @@ const StudentEditModal = ({ student, onClose, onSave, catalogs }) => {
             </button>
           </div>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Sección de Datos Personales (tu código original) */}
+            {/* Sección de Datos Personales */}
             <div>
               <h3 className="text-lg font-medium text-dark-text-primary mb-4 border-b border-dark-border pb-2">Datos Personales</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -126,7 +124,7 @@ const StudentEditModal = ({ student, onClose, onSave, catalogs }) => {
               </div>
             </div>
 
-            {/* Sección de Datos Académicos (con el select reemplazado) */}
+            {/* Sección de Datos Académicos */}
             <div>
               <h3 className="text-lg font-medium text-dark-text-primary mb-4 border-b border-dark-border pb-2">Datos Académicos</h3>
               <div className="flex flex-col gap-4">
@@ -140,8 +138,13 @@ const StudentEditModal = ({ student, onClose, onSave, catalogs }) => {
                     {catalogs.professions?.map(prof => <option key={prof.id} value={prof.id}>{prof.name}</option>)}
                   </select>
                 </div>
-                {/* --- CAMBIO AQUÍ: Reemplazo del select por el buscador --- */}
                 <div className="relative">
+                  {/* --- CAMBIO: El icono de lupa es condicional --- */}
+                  {!formData.idInstitution && (
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <Icon path="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" className="w-5 h-5 text-dark-text-secondary" />
+                    </div>
+                  )}
                   <input
                     ref={searchInputRef}
                     type="text"
@@ -149,9 +152,18 @@ const StudentEditModal = ({ student, onClose, onSave, catalogs }) => {
                     onChange={handleSearchChange}
                     onFocus={() => setIsSearchActive(true)}
                     placeholder="Buscar y seleccionar institución..."
-                    className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary"
+                    // --- CAMBIO: El padding es dinámico según si hay institución seleccionada o no ---
+                    className={`w-full bg-dark-bg border border-dark-border rounded-lg py-2 text-dark-text-primary ${
+                      formData.idInstitution ? 'pl-4 pr-10' : 'pl-10 pr-4'
+                    }`}
                     required={!formData.idInstitution}
                   />
+                  {/* --- CAMBIO: El botón de limpiar es condicional --- */}
+                  {formData.idInstitution && (
+                    <button type="button" onClick={() => { setFormData(prev => ({...prev, idInstitution: ''})); setInstitutionSearch(''); }} className="absolute inset-y-0 right-0 flex items-center pr-3">
+                      <Icon path="M6 18L18 6M6 6l12 12" className="w-5 h-5 text-dark-text-secondary" />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

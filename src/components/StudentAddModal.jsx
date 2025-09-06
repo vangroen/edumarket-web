@@ -23,7 +23,6 @@ const StudentAddModal = ({ onClose, onSave, catalogs }) => {
     idDocumentType: '', idProfession: '', idInstitution: '', idAcademicRank: '',
   });
 
-  // --- Lógica del buscador de Institución (sin cambios funcionales) ---
   const [institutionSearch, setInstitutionSearch] = useState('');
   const [isSearchActive, setIsSearchActive] = useState(false);
   const searchInputRef = useRef(null);
@@ -49,7 +48,6 @@ const StudentAddModal = ({ onClose, onSave, catalogs }) => {
 
   const searchResults = useMemo(() => {
     if (!institutionSearch) return [];
-    // Evita mostrar el dropdown si el texto de búsqueda es exactamente el de la institución ya seleccionada
     if (institutionSearch === selectedInstitutionName) return [];
     return catalogs.institutions?.filter(inst =>
       inst.name.toLowerCase().includes(institutionSearch.toLowerCase())
@@ -68,7 +66,6 @@ const StudentAddModal = ({ onClose, onSave, catalogs }) => {
       setFormData(prev => ({...prev, idInstitution: ''}));
     }
   };
-  // --- Fin de la lógica del buscador ---
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -124,6 +121,12 @@ const StudentAddModal = ({ onClose, onSave, catalogs }) => {
                   </select>
                 </div>
                 <div className="relative">
+                  {/* --- CAMBIO: El icono ahora es condicional --- */}
+                  {!formData.idInstitution && (
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <Icon path="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" className="w-5 h-5 text-dark-text-secondary" />
+                    </div>
+                  )}
                   <input
                     ref={searchInputRef}
                     type="text"
@@ -131,7 +134,10 @@ const StudentAddModal = ({ onClose, onSave, catalogs }) => {
                     onChange={handleSearchChange}
                     onFocus={() => setIsSearchActive(true)}
                     placeholder="Buscar y seleccionar institución..."
-                    className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary"
+                    // --- CAMBIO: El padding ahora es dinámico ---
+                    className={`w-full bg-dark-bg border border-dark-border rounded-lg py-2 text-dark-text-primary ${
+                      formData.idInstitution ? 'pl-4 pr-10' : 'pl-10 pr-4'
+                    }`}
                     required={!formData.idInstitution}
                   />
                   {formData.idInstitution && (
