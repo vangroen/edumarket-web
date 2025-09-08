@@ -132,7 +132,6 @@ const AgentsPage = () => {
     const handleUpdateAgent = async (formData) => {
         if (!editingAgent) return;
         try {
-            // Solo actualizamos la persona, ya que el agente no tiene más campos por ahora.
             const personPayload = {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
@@ -147,8 +146,20 @@ const AgentsPage = () => {
             setIsEditModalOpen(false);
             loadAgents();
         } catch (err) {
+            // --- LÓGICA MEJORADA PARA CAPTURAR EL ERROR ---
+            if (err.message && err.message.includes('409')) {
+                try {
+                    const jsonString = err.message.substring(err.message.indexOf('{'));
+                    const errorDetails = JSON.parse(jsonString);
+                    throw new Error(errorDetails.message || 'El número de documento ya está en uso.');
+                } catch (parseError) {
+                    throw new Error('El número de documento ya está en uso por otra persona.');
+                }
+            }
+
             setError("Ocurrió un error al actualizar el agente.");
             console.error(err);
+            throw err;
         }
     };
 

@@ -164,8 +164,20 @@ const StudentsPage = () => {
             setIsEditModalOpen(false);
             loadStudents();
         } catch (err) {
+            // --- LÓGICA MEJORADA PARA CAPTURAR EL ERROR ---
+            if (err.message && err.message.includes('409')) {
+                try {
+                    const jsonString = err.message.substring(err.message.indexOf('{'));
+                    const errorDetails = JSON.parse(jsonString);
+                    throw new Error(errorDetails.message || 'El número de documento ya está en uso.');
+                } catch (parseError) {
+                    throw new Error('El número de documento ya está en uso por otra persona.');
+                }
+            }
+
             setError("Ocurrió un error al actualizar el estudiante.");
             console.error(err);
+            throw err;
         }
     };
 
