@@ -69,34 +69,41 @@ const AgentsPage = () => {
   const handleAddClick = () => {
     loadCatalogsAndOpen(() => setIsAddModalOpen(true));
   };
-  
-  const handleCreateAgent = async (formData) => {
-    try {
-      const personPayload = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        documentNumber: formData.documentNumber,
-        idDocumentType: parseInt(formData.idDocumentType, 10),
-      };
-      const newPerson = await createData('/person', personPayload);
 
-      if (!newPerson || !newPerson.id) {
-        throw new Error("La creación de la persona no devolvió un ID válido.");
-      }
+    const handleCreateAgent = async (formData) => {
+        try {
+            let personIdToUse = formData.idPerson;
 
-      const agentPayload = { idPerson: newPerson.id };
-      await createData('/agents', agentPayload);
+            // Si no encontramos una persona, la creamos
+            if (!personIdToUse) {
+                const personPayload = {
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    email: formData.email,
+                    phone: formData.phone,
+                    address: formData.address,
+                    documentNumber: formData.documentNumber,
+                    idDocumentType: parseInt(formData.idDocumentType, 10),
+                };
+                const newPerson = await createData('/person', personPayload);
 
-      setIsAddModalOpen(false);
-      loadAgents();
-    } catch (err) {
-      setError("Ocurrió un error al crear el agente.");
-      console.error(err);
-    }
-  };
+                if (!newPerson || !newPerson.id) {
+                    throw new Error("La creación de la persona no devolvió un ID válido.");
+                }
+                personIdToUse = newPerson.id;
+            }
+
+            // Creamos el agente usando el ID de la persona
+            const agentPayload = { idPerson: personIdToUse };
+            await createData('/agents', agentPayload);
+
+            setIsAddModalOpen(false);
+            loadAgents();
+        } catch (err) {
+            setError("Ocurrió un error al crear el agente.");
+            console.error(err);
+        }
+    };
 
   // EDITAR
   const handleEditClick = (agent) => {

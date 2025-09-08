@@ -84,35 +84,42 @@ const StudentsPage = () => {
   const handleAddClick = () => {
     loadCatalogsAndOpen(() => setIsAddModalOpen(true));
   };
-  
-  const handleCreateStudent = async (formData) => {
-    try {
-      const personPayload = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        documentNumber: formData.documentNumber,
-        idDocumentType: parseInt(formData.idDocumentType, 10),
-      };
-      const newPerson = await createData('/person', personPayload);
 
-      const studentPayload = {
-        idProfession: parseInt(formData.idProfession, 10),
-        idInstitution: parseInt(formData.idInstitution, 10),
-        idAcademicRank: parseInt(formData.idAcademicRank, 10),
-        idPerson: newPerson.id,
-      };
-      await createData('/students', studentPayload);
+    const handleCreateStudent = async (formData) => {
+        try {
+            let personIdToUse = formData.idPerson; // Verificamos si ya tenemos un ID de persona
 
-      setIsAddModalOpen(false);
-      loadStudents();
-    } catch (err) {
-      setError("Ocurrió un error al crear el estudiante.");
-      console.error(err);
-    }
-  };
+            // Si no hay un ID de persona, la creamos
+            if (!personIdToUse) {
+                const personPayload = {
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    email: formData.email,
+                    phone: formData.phone,
+                    address: formData.address,
+                    documentNumber: formData.documentNumber,
+                    idDocumentType: parseInt(formData.idDocumentType, 10),
+                };
+                const newPerson = await createData('/person', personPayload);
+                personIdToUse = newPerson.id;
+            }
+
+            // Creamos el estudiante usando el ID de persona (ya sea el nuevo o el encontrado)
+            const studentPayload = {
+                idProfession: parseInt(formData.idProfession, 10),
+                idInstitution: parseInt(formData.idInstitution, 10),
+                idAcademicRank: parseInt(formData.idAcademicRank, 10),
+                idPerson: personIdToUse,
+            };
+            await createData('/students', studentPayload);
+
+            setIsAddModalOpen(false);
+            loadStudents();
+        } catch (err) {
+            setError("Ocurrió un error al crear el estudiante.");
+            console.error(err);
+        }
+    };
 
   // EDITAR
   const handleEditClick = (student) => {
