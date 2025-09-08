@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import Icon from '../components/ui/Icon';
 import { fetchData } from '../services/api';
+import ErrorModal from '../components/ui/ErrorModal'; // NUEVO: Importamos el ErrorModal
 
 const useClickOutside = (ref, handler) => {
     useEffect(() => {
@@ -26,6 +27,8 @@ const StudentAddModal = ({ onClose, onSave, catalogs }) => {
     const [searchStatus, setSearchStatus] = useState('initial');
     const [personId, setPersonId] = useState(null);
     const [searchError, setSearchError] = useState('');
+    const [saveError, setSaveError] = useState(''); // Estado para el error de guardado
+    const [isSaving, setIsSaving] = useState(false);
 
     const [institutionSearch, setInstitutionSearch] = useState('');
     const [isSearchActive, setIsSearchActive] = useState(false);
@@ -85,19 +88,12 @@ const StudentAddModal = ({ onClose, onSave, catalogs }) => {
         }
     };
 
-    const selectedInstitutionName = useMemo(() => {
-        if (!formData.idInstitution) return '';
-        const found = catalogs.institutions?.find(i => i.id === formData.idInstitution);
-        return found ? found.name : '';
-    }, [formData.idInstitution, catalogs.institutions]);
-
     const searchResults = useMemo(() => {
-        if (!institutionSearch) return [];
-        if (institutionSearch === selectedInstitutionName) return [];
+        if (!institutionSearch || formData.idInstitution) return [];
         return catalogs.institutions?.filter(inst =>
             inst.name.toLowerCase().includes(institutionSearch.toLowerCase())
         );
-    }, [institutionSearch, catalogs.institutions, selectedInstitutionName]);
+    }, [institutionSearch, catalogs.institutions, formData.idInstitution]);
 
     const handleSelectInstitution = (institution) => {
         setFormData(prev => ({ ...prev, idInstitution: institution.id }));
@@ -106,9 +102,12 @@ const StudentAddModal = ({ onClose, onSave, catalogs }) => {
     };
 
     const handleSearchChange = (e) => {
-        setInstitutionSearch(e.target.value);
-        if (formData.idInstitution) {
-            setFormData(prev => ({...prev, idInstitution: ''}));
+        const newSearchTerm = e.target.value;
+        setInstitutionSearch(newSearchTerm);
+
+        const selectedInst = catalogs.institutions?.find(i => i.id === formData.idInstitution);
+        if (selectedInst && newSearchTerm !== selectedInst.name) {
+            setFormData(prev => ({ ...prev, idInstitution: '' }));
         }
     };
 
@@ -117,9 +116,17 @@ const StudentAddModal = ({ onClose, onSave, catalogs }) => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onSave({ ...formData, idPerson: personId });
+        setSaveError(''); // Limpiamos el error antes de intentar guardar
+        setIsSaving(true);
+        try {
+            await onSave({ ...formData, idPerson: personId });
+        } catch (error) {
+            setSaveError(error.message); // Almacenamos el mensaje de error para mostrarlo en el modal
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const personalFieldsDisabled = searchStatus !== 'notFound';
@@ -145,10 +152,8 @@ const StudentAddModal = ({ onClose, onSave, catalogs }) => {
                                     {catalogs.documentTypes?.map(type => <option key={type.id} value={type.id}>{type.description}</option>)}
                                 </select>
                                 <input name="documentNumber" value={formData.documentNumber} onChange={handleChange} placeholder="Número de Documento" required className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary" />
-
                                 {searchStatus === 'loading' && <p className="text-dark-text-secondary md:col-span-2">Buscando...</p>}
                                 {searchError && <p className="text-red-400 md:col-span-2">{searchError}</p>}
-
                                 <input name="firstName" value={formData.firstName} onChange={handleChange} placeholder="Nombres" required disabled={personalFieldsDisabled} className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary disabled:bg-slate-800 disabled:text-dark-text-secondary" />
                                 <input name="lastName" value={formData.lastName} onChange={handleChange} placeholder="Apellidos" required disabled={personalFieldsDisabled} className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary disabled:bg-slate-800 disabled:text-dark-text-secondary" />
                                 <input name="email" type="email" value={formData.email} onChange={handleChange} placeholder="Email" required disabled={personalFieldsDisabled} className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary disabled:bg-slate-800 disabled:text-dark-text-secondary" />
@@ -170,38 +175,30 @@ const StudentAddModal = ({ onClose, onSave, catalogs }) => {
                                         {catalogs.professions?.map(prof => <option key={prof.id} value={prof.id}>{prof.name}</option>)}
                                     </select>
                                 </div>
-                                {/* --- SECCIÓN RESTAURADA --- */}
                                 <div className="relative">
-                                    {!formData.idInstitution && (
-                                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                            <Icon path="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" className="w-5 h-5 text-dark-text-secondary" />
-                                        </div>
-                                    )}
+                                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <Icon path="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" className="w-5 h-5 text-dark-text-secondary" />
+                                    </div>
                                     <input
                                         ref={searchInputRef}
                                         type="text"
-                                        value={formData.idInstitution ? selectedInstitutionName : institutionSearch}
+                                        value={institutionSearch}
                                         onChange={handleSearchChange}
                                         onFocus={() => setIsSearchActive(true)}
                                         placeholder="Buscar y seleccionar institución..."
                                         disabled={academicFieldsDisabled}
-                                        className={`w-full bg-dark-bg border border-dark-border rounded-lg py-2 text-dark-text-primary disabled:bg-slate-800 disabled:text-dark-text-secondary ${
-                                            formData.idInstitution ? 'pl-4 pr-10' : 'pl-10 pr-4'
-                                        }`}
+                                        className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 pl-10 pr-4 text-dark-text-primary disabled:bg-slate-800 disabled:text-dark-text-secondary"
                                         required={!formData.idInstitution}
                                     />
-                                    {formData.idInstitution && (
-                                        <button type="button" onClick={() => { setFormData(prev => ({...prev, idInstitution: ''})); setInstitutionSearch(''); }} className="absolute inset-y-0 right-0 flex items-center pr-3">
-                                            <Icon path="M6 18L18 6M6 6l12 12" className="w-5 h-5 text-dark-text-secondary" />
-                                        </button>
-                                    )}
                                 </div>
                             </div>
                         </div>
 
                         <div className="flex justify-end gap-4 pt-4">
                             <button type="button" onClick={onClose} className="px-6 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 font-semibold transition-colors">Cancelar</button>
-                            <button type="submit" className="px-6 py-2 bg-brand-accent text-white rounded-lg hover:bg-blue-600 font-semibold shadow transition-colors">Guardar Estudiante</button>
+                            <button type="submit" disabled={isSaving} className="px-6 py-2 bg-brand-accent text-white rounded-lg hover:bg-blue-600 font-semibold shadow transition-colors disabled:bg-slate-500 disabled:cursor-wait">
+                                {isSaving ? 'Guardando...' : 'Guardar Estudiante'}
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -215,10 +212,15 @@ const StudentAddModal = ({ onClose, onSave, catalogs }) => {
                 </ul>
             )}
 
-            {isSearchActive && institutionSearch && searchResults.length === 0 && (
+            {isSearchActive && institutionSearch && searchResults.length === 0 && !formData.idInstitution && (
                 <ul ref={dropdownRef} className="absolute z-[60] bg-slate-800 border border-dark-border rounded-lg shadow-lg" style={{ ...dropdownPosition }}>
                     <li className="px-4 py-2 text-dark-text-secondary">No se encontraron resultados.</li>
                 </ul>
+            )}
+
+            {/* NUEVO: Mostramos el ErrorModal si saveError tiene contenido */}
+            {saveError && (
+                <ErrorModal message={saveError} onClose={() => setSaveError('')} />
             )}
         </>
     );
