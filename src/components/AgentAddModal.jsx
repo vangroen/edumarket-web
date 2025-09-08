@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import Icon from './ui/Icon';
-// NUEVO: Importamos fetchData para la búsqueda
 import { fetchData } from '../services/api';
 
 const AgentAddModal = ({ onClose, onSave, catalogs }) => {
@@ -14,19 +13,20 @@ const AgentAddModal = ({ onClose, onSave, catalogs }) => {
         idDocumentType: '',
     });
 
-    // --- NUEVOS ESTADOS PARA CONTROLAR EL FLUJO ---
-    const [searchStatus, setSearchStatus] = useState('initial'); // 'initial', 'loading', 'found', 'notFound'
+    const [searchStatus, setSearchStatus] = useState('initial');
     const [personId, setPersonId] = useState(null);
     const [searchError, setSearchError] = useState('');
+    // --- NUEVO: Estado para errores específicos del guardado ---
+    const [saveError, setSaveError] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
 
-    // --- NUEVO: useEffect para implementar el debounce en la búsqueda ---
     useEffect(() => {
         if (!formData.documentNumber || !formData.idDocumentType) {
             return;
         }
         const debounceTimer = setTimeout(() => {
             handleDocumentCheck();
-        }, 1500); // 1.5 segundos de espera
+        }, 1500);
         return () => clearTimeout(debounceTimer);
     }, [formData.documentNumber, formData.idDocumentType]);
 
@@ -66,13 +66,23 @@ const AgentAddModal = ({ onClose, onSave, catalogs }) => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    // --- MODIFICADO: handleSubmit ahora maneja el estado de guardado y los errores ---
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // MODIFICADO: Añadimos el personId al payload
-        onSave({ ...formData, idPerson: personId });
+        setSaveError(''); // Limpia errores anteriores
+        setIsSaving(true);
+        try {
+            // onSave es la función `handleCreateAgent` que ahora puede lanzar un error
+            await onSave({ ...formData, idPerson: personId });
+            // Si onSave tiene éxito, el componente padre se encargará de cerrar el modal
+        } catch (error) {
+            // Si onSave falla (ej. error 409), capturamos el mensaje y lo mostramos
+            setSaveError(error.message);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
-    // --- NUEVO: Variable para controlar el estado 'disabled' ---
     const fieldsDisabled = searchStatus !== 'notFound';
 
     return (
@@ -88,7 +98,6 @@ const AgentAddModal = ({ onClose, onSave, catalogs }) => {
                     <div>
                         <h3 className="text-lg font-medium text-dark-text-primary mb-4 border-b border-dark-border pb-2">Datos Personales</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {/* MODIFICADO: Campos de documento siempre activos */}
                             <select name="idDocumentType" value={formData.idDocumentType} onChange={handleChange} required className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary">
                                 <option value="" disabled>Seleccione tipo de documento</option>
                                 {catalogs.documentTypes?.map(type => <option key={type.id} value={type.id}>{type.description}</option>)}
@@ -98,7 +107,6 @@ const AgentAddModal = ({ onClose, onSave, catalogs }) => {
                             {searchStatus === 'loading' && <p className="text-dark-text-secondary md:col-span-2">Buscando...</p>}
                             {searchError && <p className="text-red-400 md:col-span-2">{searchError}</p>}
 
-                            {/* MODIFICADO: Resto de campos con estado 'disabled' dinámico */}
                             <input name="firstName" value={formData.firstName} onChange={handleChange} placeholder="Nombres" required disabled={fieldsDisabled} className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary disabled:bg-slate-800 disabled:text-dark-text-secondary" />
                             <input name="lastName" value={formData.lastName} onChange={handleChange} placeholder="Apellidos" required disabled={fieldsDisabled} className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary disabled:bg-slate-800 disabled:text-dark-text-secondary" />
                             <input name="email" type="email" value={formData.email} onChange={handleChange} placeholder="Email" required disabled={fieldsDisabled} className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary disabled:bg-slate-800 disabled:text-dark-text-secondary" />
@@ -107,9 +115,18 @@ const AgentAddModal = ({ onClose, onSave, catalogs }) => {
                         </div>
                     </div>
 
+                    {/* --- NUEVO: Contenedor para el mensaje de error de guardado --- */}
+                    {saveError && (
+                        <div className="text-center p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                            <p className="text-sm text-red-400">{saveError}</p>
+                        </div>
+                    )}
+
                     <div className="flex justify-end gap-4 pt-4">
                         <button type="button" onClick={onClose} className="px-6 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 font-semibold transition-colors">Cancelar</button>
-                        <button type="submit" className="px-6 py-2 bg-brand-accent text-white rounded-lg hover:bg-blue-600 font-semibold shadow transition-colors">Guardar Agente</button>
+                        <button type="submit" disabled={isSaving} className="px-6 py-2 bg-brand-accent text-white rounded-lg hover:bg-blue-600 font-semibold shadow transition-colors disabled:bg-slate-500 disabled:cursor-wait">
+                            {isSaving ? 'Guardando...' : 'Guardar Agente'}
+                        </button>
                     </div>
                 </form>
             </div>
