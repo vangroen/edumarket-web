@@ -14,7 +14,7 @@ const StudentDetailsModal = ({ student, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-      <div className="bg-dark-surface rounded-lg shadow-2xl w-full max-w-lg p-8 m-4">
+        <div className="bg-dark-surface rounded-lg shadow-2xl w-full max-w-2xl p-8 m-4">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-dark-text-primary">
             Detalles del Estudiante
