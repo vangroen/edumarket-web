@@ -11,10 +11,8 @@ const TypePill = ({ type }) => {
     return <span className={pillClasses}>{type}</span>;
 };
 
-// --- PÍLDORA CON COLOR ACTUALIZADO ---
 // Píldora para el Tipo de Documento
 const DocumentPill = ({ type }) => {
-    // Cambiado de 'slate' a 'green' para más contraste y un look más vivo
     const pillClasses = `px-3 py-1 text-xs font-semibold rounded-full capitalize bg-green-500/20 text-green-300`;
     return <span className={pillClasses}>{type}</span>;
 }
@@ -56,10 +54,11 @@ const EnrollmentDetailsModal = ({ enrollment, onClose }) => {
                     </button>
                 </div>
 
-                <div className="overflow-y-auto p-8 pt-0 space-y-6">
+                <div className="overflow-y-auto p-8 pt-0 space-y-10">
 
                     <div>
-                        <h3 className="text-lg font-medium text-dark-text-primary mb-4 border-b border-dark-border pb-2">Información General</h3>
+                        {/* --- TÍTULO CON NUEVO COLOR --- */}
+                        <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Información General</h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
                             <DetailField label="Curso" value={enrollment.course.name} />
                             <DetailField label="Institución" value={enrollment.institution.name} />
@@ -74,40 +73,37 @@ const EnrollmentDetailsModal = ({ enrollment, onClose }) => {
                     </div>
 
                     <div>
-                        <h3 className="text-lg font-medium text-dark-text-primary mb-4 border-b border-dark-border pb-2">Datos del Estudiante</h3>
+                        {/* --- TÍTULO CON NUEVO COLOR --- */}
+                        <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Datos del Estudiante</h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
                             <DetailField label="Nombres y Apellidos" value={`${enrollment.student.person.firstName} ${enrollment.student.person.lastName}`} />
                             <DetailField label="Tipo de Documento">
                                 <DocumentPill type={enrollment.student.person.documentType.description} />
                             </DetailField>
                             <DetailField label="Número de Documento" value={enrollment.student.person.documentNumber} />
-
                             <DetailField label="Rango Académico">
                                 <AcademicRankPill rank={enrollment.student.academicRank.description} />
                             </DetailField>
                             <DetailField label="Profesión" value={enrollment.student.profession.name} />
                             <DetailField label="Institución de Origen" value={enrollment.student.institution.name} />
-
-                            {/* --- DIRECCIÓN EN LA MISMA FILA --- */}
                             <DetailField label="Email" value={enrollment.student.person.email} />
                             <DetailField label="Teléfono" value={enrollment.student.person.phone} />
-                            <DetailField label="Dirección del Estudiante" value={enrollment.student.person.address} />
+                            <DetailField label="Dirección" value={enrollment.student.person.address} />
                         </div>
                     </div>
 
                     <div>
-                        <h3 className="text-lg font-medium text-dark-text-primary mb-4 border-b border-dark-border pb-2">Datos del Agente</h3>
+                        {/* --- TÍTULO CON NUEVO COLOR --- */}
+                        <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Datos del Agente</h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
                             <DetailField label="Nombres y Apellidos" value={`${enrollment.agent.person.firstName} ${enrollment.agent.person.lastName}`} />
                             <DetailField label="Tipo de Documento">
                                 <DocumentPill type={enrollment.agent.person.documentType.description} />
                             </DetailField>
                             <DetailField label="Número de Documento" value={enrollment.agent.person.documentNumber} />
-
-                            {/* --- DIRECCIÓN EN LA MISMA FILA --- */}
                             <DetailField label="Email" value={enrollment.agent.person.email} />
                             <DetailField label="Teléfono" value={enrollment.agent.person.phone} />
-                            <DetailField label="Dirección del Agente" value={enrollment.agent.person.address} />
+                            <DetailField label="Dirección" value={enrollment.agent.person.address} />
                         </div>
                     </div>
                 </div>
