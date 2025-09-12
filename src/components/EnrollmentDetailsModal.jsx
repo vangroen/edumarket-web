@@ -88,7 +88,7 @@ const EnrollmentDetailsModal = ({ enrollment, onClose }) => {
                             <DetailField label="Institución de Origen" value={enrollment.student.institution.name} />
                             <DetailField label="Email" value={enrollment.student.person.email} />
                             <DetailField label="Teléfono" value={enrollment.student.person.phone} />
-                            <DetailField label="Dirección" value={enrollment.student.person.address} />
+                            <DetailField label="Dirección del Estudiante" value={enrollment.student.person.address} />
                         </div>
                     </div>
 
@@ -103,7 +103,7 @@ const EnrollmentDetailsModal = ({ enrollment, onClose }) => {
                             <DetailField label="Número de Documento" value={enrollment.agent.person.documentNumber} />
                             <DetailField label="Email" value={enrollment.agent.person.email} />
                             <DetailField label="Teléfono" value={enrollment.agent.person.phone} />
-                            <DetailField label="Dirección" value={enrollment.agent.person.address} />
+                            <DetailField label="Dirección del Agente" value={enrollment.agent.person.address} />
                         </div>
                     </div>
                 </div>
