@@ -23,9 +23,9 @@ const AcademicRankPill = ({rank}) => {
     return <span className={pillClasses}>{rank}</span>;
 }
 
-// --- NUEVO --- Píldora para la Duración
+// Píldora para la Duración
 const DurationPill = ({months}) => {
-    if (!months) return null; // No renderiza nada si no hay meses
+    if (!months) return null;
     const text = months > 1 ? `${months} Meses` : `${months} Mes`;
     const pillClasses = `px-3 py-1 text-xs font-semibold rounded-full capitalize bg-purple-500/20 text-purple-300`;
     return <span className={pillClasses}>{text}</span>;
@@ -47,9 +47,20 @@ const EnrollmentDetailsModal = ({enrollment, onClose}) => {
         return new Intl.NumberFormat('es-PE', {style: 'currency', currency: 'PEN'}).format(amount);
     };
 
+    // --- FUNCIÓN DE FECHA ACTUALIZADA ---
     const formatDate = (dateString) => {
         const date = new Date(dateString);
-        return new Intl.DateTimeFormat('es-PE', {dateStyle: 'long', timeStyle: 'short'}).format(date);
+        // Opciones para obtener el formato DD/MM/YYYY HH:MM am/pm
+        const options = {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+        };
+        // Formateamos y reemplazamos la coma por un espacio
+        return new Intl.DateTimeFormat('es-PE', options).format(date).replace(',', '');
     };
 
     return (
@@ -80,7 +91,6 @@ const EnrollmentDetailsModal = ({enrollment, onClose}) => {
                             <DetailField label="Pago Mensual" value={formatCurrency(enrollment.monthlyFeeAmount)}/>
                             <DetailField label="Derechos Finales" value={formatCurrency(enrollment.finalRightsAmount)}/>
 
-                            {/* --- CAMBIO AQUÍ: Duración ahora es una Píldora --- */}
                             <DetailField label="Duración del curso">
                                 <DurationPill months={enrollment.course.durationInMonths}/>
                             </DetailField>
