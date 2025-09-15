@@ -6,14 +6,15 @@ import AgentDetailsModal from '../components/AgentDetailsModal';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import {fetchData, createData, updateData, deleteData} from '../services/api';
 
+// --- Componente para la fila "esqueleto" de Agentes (con alineación) ---
 const AgentSkeletonRow = () => (
     <tr className="animate-pulse">
         <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-3/4"></div></td>
         <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-5/6"></div></td>
-        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-28"></div></td>
-        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-full"></div></td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-28 mx-auto"></div></td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-full mx-auto"></div></td>
         <td className="px-6 py-4">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center justify-center space-x-4">
                 <div className="h-5 w-5 bg-slate-700 rounded"></div>
                 <div className="h-5 w-5 bg-slate-700 rounded"></div>
                 <div className="h-5 w-5 bg-slate-700 rounded"></div>
@@ -27,7 +28,6 @@ const AgentsPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Estados para los modales
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingAgent, setEditingAgent] = useState(null);
@@ -36,12 +36,10 @@ const AgentsPage = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deletingAgent, setDeletingAgent] = useState(null);
 
-    // Estados para los datos de los formularios
     const [catalogs, setCatalogs] = useState({documentTypes: []});
     const [isModalDataLoaded, setIsModalDataLoaded] = useState(false);
     const [isOpeningModal, setIsOpeningModal] = useState(false);
 
-    // Carga la lista principal de agentes
     const loadAgents = async () => {
         setIsLoading(true);
         setError(null);
@@ -61,7 +59,6 @@ const AgentsPage = () => {
         loadAgents();
     }, []);
 
-    // Carga los catálogos necesarios para los modales de "Añadir" y "Editar"
     const loadCatalogsAndOpen = async (action) => {
         if (isModalDataLoaded) {
             action();
@@ -80,9 +77,6 @@ const AgentsPage = () => {
         }
     };
 
-    // --- MANEJADORES DE ACCIONES CRUD ---
-
-    // AÑADIR
     const handleAddClick = () => {
         loadCatalogsAndOpen(() => setIsAddModalOpen(true));
     };
@@ -130,7 +124,6 @@ const AgentsPage = () => {
         }
     };
 
-    // EDITAR
     const handleEditClick = (agent) => {
         loadCatalogsAndOpen(() => {
             setEditingAgent(agent);
@@ -170,13 +163,11 @@ const AgentsPage = () => {
         }
     };
 
-    // VER DETALLES
     const handleViewDetails = (agent) => {
         setSelectedAgent(agent);
         setIsDetailsModalOpen(true);
     };
 
-    // ELIMINAR
     const handleDeleteClick = (agent) => {
         setDeletingAgent(agent);
         setIsDeleteModalOpen(true);
@@ -197,7 +188,6 @@ const AgentsPage = () => {
 
     return (
         <div>
-            {/* ... (Cabecera no cambia) ... */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8">
                 <div>
                     <h1 className="text-3xl font-bold text-dark-text-primary">Gestión de Agentes</h1>
@@ -223,16 +213,17 @@ const AgentsPage = () => {
                 </div>
             </div>
 
-            <div className="bg-dark-surface rounded-lg shadow-lg overflow-hidden">
-                <div className="overflow-x-auto">
+            {/* === INICIO DE CAMBIOS === */}
+            <div className="bg-dark-surface rounded-lg shadow-lg">
+                <div className="overflow-auto max-h-[calc(100vh-20rem)]">
                     <table className="min-w-full">
-                        <thead className="bg-slate-800">
+                        <thead className="bg-slate-800 sticky top-0 z-10">
                         <tr>
                             <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Nombre Completo</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Email</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Teléfono</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Documento</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Acciones</th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Email</th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Teléfono</th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Documento</th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Acciones</th>
                         </tr>
                         </thead>
                         <tbody className="divide-y divide-dark-border">
@@ -242,13 +233,13 @@ const AgentsPage = () => {
                             !error && agents.map((agent) => (
                                 <tr key={agent.id} className="hover:bg-slate-700/50 transition-colors duration-150">
                                     <td className="px-6 py-4 text-sm font-medium text-dark-text-primary whitespace-nowrap">{`${agent?.person?.firstName || ''} ${agent?.person?.lastName || ''}`}</td>
-                                    <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap">{agent?.person?.email || 'N/A'}</td>
-                                    <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap">{agent?.person?.phone || 'N/A'}</td>
-                                    <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap">
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap text-center">{agent?.person?.email || 'N/A'}</td>
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap text-center">{agent?.person?.phone || 'N/A'}</td>
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap text-center">
                                         {`${agent?.person?.documentType?.description || 'N/A'}: ${agent?.person?.documentNumber || ''}`}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-dark-text-secondary">
-                                        <div className="flex items-center space-x-4">
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary text-center">
+                                        <div className="flex items-center justify-center space-x-4">
                                             <button onClick={() => handleViewDetails(agent)} className="hover:text-dark-text-primary" title="Ver detalles">
                                                 <Icon path="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM15 12a3 3 0 11-6 0 3 3 0 016 0z" className="w-5 h-5"/>
                                             </button>
@@ -264,16 +255,16 @@ const AgentsPage = () => {
                             )))}
                         </tbody>
                     </table>
-                    {error && <p className="p-4 text-center text-red-400">{error}</p>}
-                    {!isLoading && !error && agents.length === 0 &&
-                        <p className="p-4 text-center text-dark-text-secondary">No se encontraron agentes.</p>}
                 </div>
+                {/* === FIN DE CAMBIOS === */}
+                {error && <p className="p-4 text-center text-red-400">{error}</p>}
+                {!isLoading && !error && agents.length === 0 &&
+                    <p className="p-4 text-center text-dark-text-secondary">No se encontraron agentes.</p>}
                 <div className="flex justify-between items-center p-4 text-sm text-dark-text-secondary">
                     <p>Mostrando {agents.length} de {agents.length} agentes</p>
                 </div>
             </div>
 
-            {/* ... (Modales) ... */}
             {isAddModalOpen && (<AgentAddModal onClose={() => setIsAddModalOpen(false)} onSave={handleCreateAgent} catalogs={catalogs}/>)}
             {isEditModalOpen && (<AgentEditModal agent={editingAgent} onClose={() => setIsEditModalOpen(false)} onSave={handleUpdateAgent} catalogs={catalogs}/>)}
             {isDetailsModalOpen && (<AgentDetailsModal agent={selectedAgent} onClose={() => setIsDetailsModalOpen(false)}/>)}

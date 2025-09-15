@@ -4,16 +4,16 @@ import EnrollmentDetailsModal from '../components/EnrollmentDetailsModal';
 import EnrollmentAddModal from '../components/EnrollmentAddModal';
 import { fetchData, createData } from '../services/api';
 
-// --- NUEVO: Componente para la fila "esqueleto" de Matrículas ---
+// --- Componente para la fila "esqueleto" de Matrículas (con alineación) ---
 const EnrollmentSkeletonRow = () => (
     <tr className="animate-pulse">
         <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-3/4"></div></td>
         <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-5/6"></div></td>
         <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-2/3"></div></td>
-        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-24"></div></td>
-        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-28"></div></td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-24 ml-auto"></div></td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-28 mx-auto"></div></td>
         <td className="px-6 py-4">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center justify-center space-x-4">
                 <div className="h-5 w-5 bg-slate-700 rounded"></div>
             </div>
         </td>
@@ -27,7 +27,6 @@ const EnrollmentsPage = () => {
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
     const [selectedEnrollment, setSelectedEnrollment] = useState(null);
 
-    // Estados para el modal de añadir
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [catalogs, setCatalogs] = useState({ students: [], agents: [], courses: [] });
     const [isModalDataLoaded, setIsModalDataLoaded] = useState(false);
@@ -38,7 +37,6 @@ const EnrollmentsPage = () => {
         setIsLoading(true);
         setError(null);
         try {
-            // Simulación de carga
             await new Promise(resolve => setTimeout(resolve, 1500));
             const data = await fetchData('/enrollment');
             setEnrollments(Array.isArray(data) ? data : []);
@@ -54,7 +52,6 @@ const EnrollmentsPage = () => {
         loadEnrollments();
     }, []);
 
-    // ... (el resto de las funciones no cambian)
     const loadCatalogsAndOpen = async (action) => {
         if (isModalDataLoaded) {
             action();
@@ -139,17 +136,18 @@ const EnrollmentsPage = () => {
                 </div>
             </div>
 
-            <div className="bg-dark-surface rounded-lg shadow-lg overflow-hidden">
-                <div className="overflow-x-auto">
+            {/* === INICIO DE CAMBIOS === */}
+            <div className="bg-dark-surface rounded-lg shadow-lg">
+                <div className="overflow-auto max-h-[calc(100vh-20rem)]">
                     <table className="min-w-full">
-                        <thead className="border-b border-dark-border">
-                        <tr>
+                        <thead className="sticky top-0 bg-dark-surface z-10">
+                        <tr className="border-b border-dark-border">
                             <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Alumno</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Curso</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Institución</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Costo Total</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Fecha de Matrícula</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Acciones</th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Curso</th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Institución</th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Costo Total</th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Fecha de Matrícula</th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Acciones</th>
                         </tr>
                         </thead>
                         <tbody className="divide-y divide-dark-border">
@@ -163,24 +161,24 @@ const EnrollmentsPage = () => {
                                             {`${enroll.student.person.firstName} ${enroll.student.person.lastName}`}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm font-medium text-dark-text-primary align-top">
+                                    <td className="px-6 py-4 text-sm font-medium text-dark-text-primary align-top text-center">
                                         <div className="max-w-xs" title={enroll.course.name}>
                                             {enroll.course.name}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top">
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top whitespace-nowrap text-center">
                                         <div className="max-w-xs" title={enroll.institution.name}>
                                             {enroll.institution.name}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top">
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top whitespace-nowrap text-center">
                                         {formatCurrency(enroll.totalEnrollmentCost)}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top">
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top whitespace-nowrap text-center">
                                         {formatDate(enroll.enrollmentDate)}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top">
-                                        <div className="flex items-center space-x-4">
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top text-center">
+                                        <div className="flex items-center justify-center space-x-4">
                                             <button onClick={() => handleViewDetails(enroll)}
                                                     className="hover:text-dark-text-primary" title="Ver detalles">
                                                 <Icon
@@ -195,6 +193,7 @@ const EnrollmentsPage = () => {
                         </tbody>
                     </table>
                 </div>
+                {/* === FIN DE CAMBIOS === */}
                 {error && <p className="p-4 text-center text-red-400">{error}</p>}
                 {!isLoading && !error && enrollments.length === 0 &&
                     <p className="p-4 text-center text-dark-text-secondary">No se encontraron matrículas.</p>}

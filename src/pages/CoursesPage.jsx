@@ -5,7 +5,6 @@ import CourseAddModal from '../components/CourseAddModal';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import { fetchData, updateData, createData, deleteData } from '../services/api';
 
-// --- (Componentes de Píldoras no cambian) ---
 const CourseTypePill = ({ type }) => {
     const isEspecializacion = type.toLowerCase().includes('especialización');
     const pillClasses = `px-3 py-1 text-xs font-semibold rounded-full capitalize ${isEspecializacion ? 'bg-purple-500/20 text-purple-300' : 'bg-blue-500/20 text-blue-300'}`;
@@ -17,17 +16,17 @@ const ModalityPill = ({ modality }) => {
     return <span className={pillClasses}>{modality}</span>;
 };
 
-// --- NUEVO: Componente para la fila "esqueleto" de Cursos ---
+// --- Componente para la fila "esqueleto" de Cursos (con alineación) ---
 const CourseSkeletonRow = () => (
     <tr className="animate-pulse">
         <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-5/6"></div></td>
         <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-2/3"></div></td>
-        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-20"></div></td>
-        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-24"></div></td>
-        <td className="px-6 py-4"><div className="h-6 bg-slate-700 rounded-full w-24"></div></td>
-        <td className="px-6 py-4"><div className="h-6 bg-slate-700 rounded-full w-28"></div></td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-24 mx-auto"></div></td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-24 ml-auto"></div></td>
+        <td className="px-6 py-4"><div className="h-6 bg-slate-700 rounded-full w-24 mx-auto"></div></td>
+        <td className="px-6 py-4"><div className="h-6 bg-slate-700 rounded-full w-28 mx-auto"></div></td>
         <td className="px-6 py-4">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center justify-center space-x-4">
                 <div className="h-5 w-5 bg-slate-700 rounded"></div>
                 <div className="h-5 w-5 bg-slate-700 rounded"></div>
             </div>
@@ -36,10 +35,8 @@ const CourseSkeletonRow = () => (
 );
 
 const CoursesPage = () => {
-    // ... (estados no cambian)
     const [courses, setCourses] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    // ... (el resto de los estados)
     const [error, setError] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingCourse, setEditingCourse] = useState(null);
@@ -56,7 +53,6 @@ const CoursesPage = () => {
         setIsLoading(true);
         setError(null);
         try {
-            // Simulación de carga
             await new Promise(resolve => setTimeout(resolve, 1500));
             const coursesData = await fetchData('/courses');
             setCourses(coursesData);
@@ -71,7 +67,6 @@ const CoursesPage = () => {
         loadCourses();
     }, []);
 
-    // ... (el resto de las funciones no cambian)
     const loadModalDataAndOpen = async (openAction) => {
         if (isModalDataLoaded) {
             openAction();
@@ -156,7 +151,6 @@ const CoursesPage = () => {
 
     return (
         <div>
-            {/* ... (Cabecera de la página no cambia) ... */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8">
                 <div>
                     <h1 className="text-3xl font-bold text-dark-text-primary">Gestión de Cursos</h1>
@@ -176,18 +170,19 @@ const CoursesPage = () => {
                 </div>
             </div>
 
-            <div className="bg-dark-surface rounded-lg shadow-lg overflow-hidden">
-                <div className="overflow-x-auto">
+            {/* === INICIO DE CAMBIOS === */}
+            <div className="bg-dark-surface rounded-lg shadow-lg">
+                <div className="overflow-auto max-h-[calc(100vh-20rem)]">
                     <table className="min-w-full">
-                        <thead className="border-b border-dark-border">
-                        <tr>
+                        <thead className="sticky top-0 bg-dark-surface z-10">
+                        <tr className="border-b border-dark-border">
                             <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Nombre del Curso</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Instituciones</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Duración</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Costo</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Modalidad</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Tipo</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Acciones</th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Instituciones</th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Duración</th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Costo</th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Modalidad</th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Tipo</th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Acciones</th>
                         </tr>
                         </thead>
                         <tbody className="divide-y divide-dark-border">
@@ -197,35 +192,35 @@ const CoursesPage = () => {
                             !error && courses.map((course) => (
                                 <tr key={course.id} className="hover:bg-slate-700/50 transition-colors duration-150">
                                     <td className="px-6 py-4 text-sm font-medium text-dark-text-primary align-top">{course.name}</td>
-                                    <td className="px-6 py-4 text-sm text-dark-text-primary align-top">
+                                    <td className="px-6 py-4 text-sm text-dark-text-primary align-top whitespace-nowrap text-center">
                                         <div className="flex flex-col gap-y-2">
                                             {course.institutions.map(({ institution }) => (
                                                 <div key={institution.id} className="truncate" title={institution.name}>{institution.name}</div>
                                             ))}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top whitespace-nowrap">
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top whitespace-nowrap text-center">
                                         <div className="flex flex-col gap-y-2">
                                             {course.institutions.map(({ institution, durationInMonths }) => (
                                                 <div key={institution.id}>{durationInMonths} meses</div>
                                             ))}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top whitespace-nowrap">
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top whitespace-nowrap text-center">
                                         <div className="flex flex-col gap-y-2">
                                             {course.institutions.map(({ institution, price }) => (
                                                 <div key={institution.id}>{formatCurrency(price)}</div>
                                             ))}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm align-top">
+                                    <td className="px-6 py-4 text-sm align-top text-center">
                                         <ModalityPill modality={course.modality.description} />
                                     </td>
-                                    <td className="px-6 py-4 text-sm align-top">
+                                    <td className="px-6 py-4 text-sm align-top text-center">
                                         <CourseTypePill type={course.courseType.description} />
                                     </td>
                                     <td className="px-6 py-4 text-sm text-dark-text-secondary align-top">
-                                        <div className="flex items-center space-x-4">
+                                        <div className="flex items-center justify-center space-x-4">
                                             <button onClick={() => handleEditClick(course)} disabled={isOpeningModal} className="hover:text-dark-text-primary disabled:text-slate-600 disabled:cursor-wait" title="Editar curso">
                                                 <Icon path="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" className="w-5 h-5" />
                                             </button>
@@ -240,6 +235,7 @@ const CoursesPage = () => {
                         </tbody>
                     </table>
                 </div>
+                {/* === FIN DE CAMBIOS === */}
                 {error && <p className="p-4 text-center text-red-400">{error}</p>}
                 {!isLoading && !error && courses.length === 0 && <p className="p-4 text-center text-dark-text-secondary">No se encontraron cursos.</p>}
                 <div className="flex justify-between items-center p-4 text-sm text-dark-text-secondary">
@@ -247,7 +243,6 @@ const CoursesPage = () => {
                 </div>
             </div>
 
-            {/* ... (resto de los modales no cambian) ... */}
             {isEditModalOpen && (
                 <CourseEditModal
                     course={editingCourse}

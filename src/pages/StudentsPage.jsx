@@ -6,15 +6,15 @@ import StudentEditModal from '../components/StudentEditModal';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import {fetchData, createData, updateData, deleteData} from '../services/api';
 
-// --- NUEVO: Componente para la fila "esqueleto" de Estudiantes ---
+// --- Componente para la fila "esqueleto" de Estudiantes (con alineación) ---
 const StudentSkeletonRow = () => (
     <tr className="animate-pulse">
         <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-3/4"></div></td>
         <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-5/6"></div></td>
-        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-28"></div></td>
-        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-full"></div></td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-28 mx-auto"></div></td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-full mx-auto"></div></td>
         <td className="px-6 py-4">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center justify-center space-x-4">
                 <div className="h-5 w-5 bg-slate-700 rounded"></div>
                 <div className="h-5 w-5 bg-slate-700 rounded"></div>
                 <div className="h-5 w-5 bg-slate-700 rounded"></div>
@@ -24,7 +24,6 @@ const StudentSkeletonRow = () => (
 );
 
 const StudentsPage = () => {
-    // ... (los estados no cambian)
     const [students, setStudents] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -48,7 +47,6 @@ const StudentsPage = () => {
         setIsLoading(true);
         setError(null);
         try {
-            // Simulación de carga
             await new Promise(resolve => setTimeout(resolve, 1500));
             const data = await fetchData('/students');
             setStudents(Array.isArray(data) ? data : []);
@@ -64,7 +62,6 @@ const StudentsPage = () => {
         loadStudents();
     }, []);
 
-    // ... (el resto de las funciones no cambian)
     const loadCatalogsAndOpen = async (action) => {
         if (isModalDataLoaded) {
             action();
@@ -209,7 +206,6 @@ const StudentsPage = () => {
 
     return (
         <div>
-            {/* ... (Cabecera de la página no cambia) ... */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8">
                 <div>
                     <h1 className="text-3xl font-bold text-dark-text-primary">Gestión de Estudiantes</h1>
@@ -235,16 +231,17 @@ const StudentsPage = () => {
                 </div>
             </div>
 
-            <div className="bg-dark-surface rounded-lg shadow-lg overflow-hidden">
-                <div className="overflow-x-auto">
+            {/* === INICIO DE CAMBIOS === */}
+            <div className="bg-dark-surface rounded-lg shadow-lg">
+                <div className="overflow-auto max-h-[calc(100vh-20rem)]">
                     <table className="min-w-full">
-                        <thead className="bg-slate-800">
+                        <thead className="bg-slate-800 sticky top-0 z-10">
                         <tr>
                             <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Nombre Completo</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Email</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Teléfono</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Documento</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Acciones</th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Email</th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Teléfono</th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Documento</th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Acciones</th>
                         </tr>
                         </thead>
                         <tbody className="divide-y divide-dark-border">
@@ -253,14 +250,14 @@ const StudentsPage = () => {
                         ) : (
                             !error && students.map((student) => (
                                 <tr key={student.id} className="hover:bg-slate-700/50 transition-colors duration-150">
-                                    <td className="px-6 py-4 text-sm font-medium text-dark-text-primary whitespace-nowrap">{`${student.person.firstName} ${student.person.lastName}`}</td>
-                                    <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap">{student.person.email}</td>
-                                    <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap">{student.person.phone}</td>
-                                    <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap">
+                                    <td className="px-6 py-4 text-sm font-medium text-dark-text-primary">{`${student.person.firstName} ${student.person.lastName}`}</td>
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap text-center">{student.person.email}</td>
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap text-center">{student.person.phone}</td>
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap text-center">
                                         {`${student.person.documentType.description}: ${student.person.documentNumber}`}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-dark-text-secondary">
-                                        <div className="flex items-center space-x-4">
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary text-center">
+                                        <div className="flex items-center justify-center space-x-4">
                                             <button onClick={() => handleViewDetails(student)}
                                                     className="hover:text-dark-text-primary" title="Ver detalles">
                                                 <Icon
@@ -286,10 +283,11 @@ const StudentsPage = () => {
                         )}
                         </tbody>
                     </table>
-                    {error && <p className="p-4 text-center text-red-400">{error}</p>}
-                    {!isLoading && !error && students.length === 0 &&
-                        <p className="p-4 text-center text-dark-text-secondary">No se encontraron estudiantes.</p>}
                 </div>
+                {/* === FIN DE CAMBIOS === */}
+                {error && <p className="p-4 text-center text-red-400">{error}</p>}
+                {!isLoading && !error && students.length === 0 &&
+                    <p className="p-4 text-center text-dark-text-secondary">No se encontraron estudiantes.</p>}
                 <div className="flex justify-between items-center p-4 text-sm text-dark-text-secondary">
                     <p>Mostrando {students.length} de {students.length} estudiantes</p>
                 </div>
@@ -298,7 +296,6 @@ const StudentsPage = () => {
             {isDetailsModalOpen && (
                 <StudentDetailsModal student={selectedStudent} onClose={() => setIsDetailsModalOpen(false)}/>
             )}
-            {/* ... (resto de los modales no cambian) ... */}
             {isAddModalOpen && (
                 <StudentAddModal onClose={() => setIsAddModalOpen(false)} onSave={handleCreateStudent}
                                  catalogs={catalogs}/>
