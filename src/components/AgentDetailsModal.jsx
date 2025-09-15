@@ -36,21 +36,18 @@ const AgentDetailsModal = ({ agent, onClose }) => {
                 </div>
 
                 {/* Contenido principal con scroll */}
-                <div className="overflow-y-auto p-8">
-                    <div className="space-y-10 animate-fade-in">
-                        {/* Sección de Datos Personales con el orden y estilo unificado */}
-                        <div>
-                            <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Datos Personales</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
-                                <DetailField label="Nombres y Apellidos" value={`${agent.person.firstName} ${agent.person.lastName}`} />
-                                <DetailField label="Tipo de Documento">
-                                    <DocumentPill type={agent.person.documentType.description} />
-                                </DetailField>
-                                <DetailField label="Número de Documento" value={agent.person.documentNumber} />
-                                <DetailField label="Email" value={agent.person.email} />
-                                <DetailField label="Teléfono" value={agent.person.phone} />
-                                <DetailField label="Dirección" value={agent.person.address} />
-                            </div>
+                <div className="overflow-y-auto p-8 pt-4">
+                    <div className="animate-fade-in">
+                        {/* === CAMBIO: Se eliminó el subtítulo "Datos Personales" y su div contenedor === */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
+                            <DetailField label="Nombres y Apellidos" value={`${agent.person.firstName} ${agent.person.lastName}`} />
+                            <DetailField label="Tipo de Documento">
+                                <DocumentPill type={agent.person.documentType.description} />
+                            </DetailField>
+                            <DetailField label="Número de Documento" value={agent.person.documentNumber} />
+                            <DetailField label="Email" value={agent.person.email} />
+                            <DetailField label="Teléfono" value={agent.person.phone} />
+                            <DetailField label="Dirección" value={agent.person.address} />
                         </div>
                     </div>
                 </div>
