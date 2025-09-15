@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchData } from '../services/api';
-import PaymentAddModal from './PaymentAddModal'; // Importamos el nuevo modal
+import PaymentAddModal from './PaymentAddModal';
+import PaymentDetailsModal from './PaymentDetailsModal'; // --- NUEVO: Importamos el modal de detalles ---
 
 // Píldora para el estado del pago (sin cambios)
 const PaymentStatusPill = ({ status }) => {
@@ -21,24 +22,14 @@ const PaymentStatusPill = ({ status }) => {
     return <span className={pillClasses}>{status}</span>;
 };
 
-// ... (El componente ScheduleSkeletonRow no cambia)
+// Componente de esqueleto (sin cambios)
 const ScheduleSkeletonRow = () => (
     <tr className="animate-pulse">
-        <td className="px-6 py-4">
-            <div className="h-4 bg-slate-700 rounded w-2/3"></div>
-        </td>
-        <td className="px-6 py-4">
-            <div className="h-4 bg-slate-700 rounded w-24"></div>
-        </td>
-        <td className="px-6 py-4">
-            <div className="h-4 bg-slate-700 rounded w-28"></div>
-        </td>
-        <td className="px-6 py-4">
-            <div className="h-6 bg-slate-700 rounded-full w-24"></div>
-        </td>
-        <td className="px-6 py-4">
-            <div className="h-8 w-24 bg-slate-700 rounded-lg"></div>
-        </td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-2/3"></div></td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-24"></div></td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-28"></div></td>
+        <td className="px-6 py-4"><div className="h-6 bg-slate-700 rounded-full w-24"></div></td>
+        <td className="px-6 py-4"><div className="h-8 w-24 bg-slate-700 rounded-lg"></div></td>
     </tr>
 );
 
@@ -47,13 +38,18 @@ const PaymentSchedule = ({ enrollmentId }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // --- NUEVOS ESTADOS PARA MANEJAR EL MODAL DE PAGO ---
+    // Estados para el modal de añadir pago
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [selectedScheduleItem, setSelectedScheduleItem] = useState(null);
 
+    // --- NUEVOS ESTADOS PARA MANEJAR EL MODAL DE DETALLES ---
+    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+    const [selectedPaymentDetails, setSelectedPaymentDetails] = useState(null);
+    const [isFetchingDetails, setIsFetchingDetails] = useState(false);
+
+
     const loadSchedule = async () => {
         if (!enrollmentId) return;
-        // No establecemos isLoading a true aquí para un refresco más suave
         setError(null);
         try {
             const allSchedules = await fetchData('/payments-schedules');
@@ -62,16 +58,16 @@ const PaymentSchedule = ({ enrollmentId }) => {
         } catch (err) {
             setError('No se pudo cargar el cronograma de pagos.');
         } finally {
-            setIsLoading(false); // Aseguramos que el estado de carga termine
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        setIsLoading(true); // Solo en la carga inicial
+        setIsLoading(true);
         loadSchedule();
     }, [enrollmentId]);
 
-    // --- MANEJADORES PARA EL MODAL DE PAGO ---
+    // --- MANEJADORES PARA EL MODAL DE AÑADIR PAGO ---
     const handleOpenPaymentModal = (scheduleItem) => {
         setSelectedScheduleItem(scheduleItem);
         setIsPaymentModalOpen(true);
@@ -84,21 +80,37 @@ const PaymentSchedule = ({ enrollmentId }) => {
 
     const handleSavePayment = () => {
         handleClosePaymentModal();
-        // Refrescamos la lista de pagos para ver el estado actualizado
-        loadSchedule();
+        loadSchedule(); // Refrescamos la lista para ver el estado actualizado
     };
 
-
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(amount);
+    // --- NUEVOS MANEJADORES PARA EL MODAL DE DETALLES ---
+    const handleOpenDetailsModal = async (scheduleItem) => {
+        setIsDetailsModalOpen(true);
+        setIsFetchingDetails(true);
+        setSelectedPaymentDetails(null); // Limpiamos datos anteriores
+        try {
+            // Usamos el ID del item del cronograma para obtener el pago asociado
+            const paymentData = await fetchData(`/payments/${scheduleItem.id}`);
+            setSelectedPaymentDetails(paymentData);
+        } catch (err) {
+            setError('No se pudo cargar el detalle del pago.');
+            // Cerramos el modal si hay un error para evitar que se quede abierto y vacío
+            setIsDetailsModalOpen(false);
+        } finally {
+            setIsFetchingDetails(false);
+        }
     };
 
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return new Intl.DateTimeFormat('es-PE', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
+    const handleCloseDetailsModal = () => {
+        setIsDetailsModalOpen(false);
+        setSelectedPaymentDetails(null);
     };
 
-    // ... (el bloque de isLoading no cambia)
+    // Funciones de formato (sin cambios)
+    const formatCurrency = (amount) => new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(amount);
+    const formatDate = (dateString) => new Intl.DateTimeFormat('es-PE', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(dateString));
+
+    // ... (Bloques de isLoading y error sin cambios) ...
     if (isLoading) {
         return (
             <div className="overflow-x-auto rounded-lg border border-dark-border">
@@ -112,19 +124,12 @@ const PaymentSchedule = ({ enrollmentId }) => {
                         <th className="px-6 py-3 text-left text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Acciones</th>
                     </tr>
                     </thead>
-                    <tbody className="divide-y divide-dark-border">
-                    {[...Array(5)].map((_, index) => (
-                        <ScheduleSkeletonRow key={index} />
-                    ))}
-                    </tbody>
+                    <tbody className="divide-y divide-dark-border">{[...Array(5)].map((_, index) => <ScheduleSkeletonRow key={index} />)}</tbody>
                 </table>
             </div>
         );
     }
-
-    if (error) {
-        return <p className="p-4 text-center text-red-400">{error}</p>;
-    }
+    if (error) { return <p className="p-4 text-center text-red-400">{error}</p>; }
 
     return (
         <>
@@ -136,7 +141,6 @@ const PaymentSchedule = ({ enrollmentId }) => {
                         <th className="px-6 py-3 text-left text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Monto</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Fecha de Vencimiento</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Estado</th>
-                        {/* --- NUEVA COLUMNA DE ACCIONES --- */}
                         <th className="px-6 py-3 text-left text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Acciones</th>
                     </tr>
                     </thead>
@@ -146,10 +150,9 @@ const PaymentSchedule = ({ enrollmentId }) => {
                             <td className="px-6 py-4 text-sm text-dark-text-primary">{item.conceptType.description}</td>
                             <td className="px-6 py-4 text-sm text-dark-text-primary whitespace-nowrap">{formatCurrency(item.installmentAmount)}</td>
                             <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap">{formatDate(item.installmentDueDate)}</td>
-                            <td className="px-6 py-4 text-sm text-dark-text-secondary">
-                                <PaymentStatusPill status={item.installmentStatus.status} />
-                            </td>
-                            {/* --- CELDA CON EL BOTÓN CONDICIONAL --- */}
+                            <td className="px-6 py-4 text-sm text-dark-text-secondary"><PaymentStatusPill status={item.installmentStatus.status} /></td>
+
+                            {/* --- MODIFICADO: Lógica condicional para los botones de acción --- */}
                             <td className="px-6 py-4 text-sm">
                                 {item.installmentStatus.status.toLowerCase() !== 'pagado' ? (
                                     <button
@@ -159,7 +162,13 @@ const PaymentSchedule = ({ enrollmentId }) => {
                                         Registrar Pago
                                     </button>
                                 ) : (
-                                    <span className="text-xs text-dark-text-secondary/70 italic">N/A</span>
+                                    <button
+                                        onClick={() => handleOpenDetailsModal(item)}
+                                        className="px-3 py-1.5 bg-slate-600/80 text-white rounded-lg hover:bg-slate-600 text-xs font-semibold transition-colors"
+                                        disabled={isFetchingDetails}
+                                    >
+                                        Ver Detalle
+                                    </button>
                                 )}
                             </td>
                         </tr>
@@ -167,11 +176,21 @@ const PaymentSchedule = ({ enrollmentId }) => {
                     </tbody>
                 </table>
             </div>
+
+            {/* Modal para añadir pago (existente) */}
             {isPaymentModalOpen && (
                 <PaymentAddModal
                     scheduleItem={selectedScheduleItem}
                     onClose={handleClosePaymentModal}
                     onSave={handleSavePayment}
+                />
+            )}
+
+            {/* --- NUEVO: Renderizado condicional del modal de detalles --- */}
+            {isDetailsModalOpen && (
+                <PaymentDetailsModal
+                    payment={selectedPaymentDetails}
+                    onClose={handleCloseDetailsModal}
                 />
             )}
         </>
