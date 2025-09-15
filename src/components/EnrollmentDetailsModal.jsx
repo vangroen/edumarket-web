@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Icon from './ui/Icon';
 import PaymentSchedule from "./PaymentSchedule.jsx";
 
-// --- Todos los componentes auxiliares (Pills y DetailField) se mantienen igual ---
+// --- COMPONENTES AUXILIARES ---
 const TypePill = ({type}) => {
     const pillClasses = `px-3 py-1 text-xs font-semibold rounded-full capitalize ${
         type.toLowerCase() === 'universidad'
@@ -145,7 +145,8 @@ const EnrollmentDetailsModal = ({enrollment, onClose}) => {
                     </div>
                 </div>
 
-                <div className="flex-shrink-0 flex justify-end p-4 border-t border-dark-border">
+                {/* Pie del modal - CAMBIO AQUÍ: Se eliminó el borde superior */}
+                <div className="flex-shrink-0 flex justify-end p-4">
                     <button
                         type="button"
                         onClick={onClose}
