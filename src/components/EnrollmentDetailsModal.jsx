@@ -120,12 +120,12 @@ const EnrollmentDetailsModal = ({enrollment, onClose}) => {
                                     <DetailField label="Nombres y Apellidos" value={`${enrollment.student.person.firstName} ${enrollment.student.person.lastName}`}/>
                                     <DetailField label="Tipo de Documento"><DocumentPill type={enrollment.student.person.documentType.description}/></DetailField>
                                     <DetailField label="Número de Documento" value={enrollment.student.person.documentNumber}/>
-                                    <DetailField label="Rango Académico"><AcademicRankPill rank={enrollment.student.academicRank.description}/></DetailField>
-                                    <DetailField label="Profesión" value={enrollment.student.profession.name}/>
-                                    <DetailField label="Institución de Origen" value={enrollment.student.institution.name}/>
                                     <DetailField label="Email" value={enrollment.student.person.email}/>
                                     <DetailField label="Teléfono" value={enrollment.student.person.phone}/>
                                     <DetailField label="Dirección" value={enrollment.student.person.address}/>
+                                    <DetailField label="Rango Académico"><AcademicRankPill rank={enrollment.student.academicRank.description}/></DetailField>
+                                    <DetailField label="Profesión" value={enrollment.student.profession.name}/>
+                                    <DetailField label="Institución de Origen" value={enrollment.student.institution.name}/>
                                 </div>
                             </div>
                             {/* Datos del Agente */}
