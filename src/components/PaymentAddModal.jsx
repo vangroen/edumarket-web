@@ -57,8 +57,7 @@ const PaymentAddModal = ({ scheduleItem, onClose, onSave }) => {
     return (
         <>
             <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[60]">
-                {/* --- MODIFICADO: Ancho del modal y estructura del formulario --- */}
-                <form onSubmit={handleSubmit} className="bg-dark-surface rounded-lg shadow-2xl w-full max-w-xl p-8 m-4">
+                <form onSubmit={handleSubmit} className="bg-dark-surface rounded-lg shadow-2xl w-full max-w-md p-8 m-4">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-bold text-dark-text-primary">Registrar Pago</h2>
                         <button type="button" onClick={onClose} className="text-dark-text-secondary hover:text-dark-text-primary">
@@ -66,11 +65,13 @@ const PaymentAddModal = ({ scheduleItem, onClose, onSave }) => {
                         </button>
                     </div>
 
+                    {/* === INICIO DE CAMBIOS === */}
                     <div className="space-y-6">
-                        {/* --- NUEVA SECCIÓN: Detalles de la cuota --- */}
+                        {/* Sección de Detalles de la cuota */}
                         <div>
                             <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Detalles de la Cuota</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Se reemplaza el grid por un contenedor con espaciado vertical */}
+                            <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-dark-text-secondary mb-2">Concepto</label>
                                     <input
@@ -92,28 +93,28 @@ const PaymentAddModal = ({ scheduleItem, onClose, onSave }) => {
                             </div>
                         </div>
 
-                        {/* --- NUEVA SECCIÓN: Datos del pago --- */}
+                        {/* Sección de Datos del pago */}
                         <div>
                             <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Datos del Pago</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label htmlFor="paymentType" className="block text-sm font-medium text-dark-text-secondary mb-2">Tipo de Pago</label>
-                                    <select
-                                        id="paymentType"
-                                        value={idPaymentType}
-                                        onChange={(e) => setIdPaymentType(e.target.value)}
-                                        className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary"
-                                        required
-                                    >
-                                        <option value="" disabled>Seleccione...</option>
-                                        {paymentTypes.map(type => (
-                                            <option key={type.id} value={type.id}>{type.description}</option>
-                                        ))}
-                                    </select>
-                                </div>
+                            {/* Ya no es necesario un grid para un solo elemento */}
+                            <div>
+                                <label htmlFor="paymentType" className="block text-sm font-medium text-dark-text-secondary mb-2">Tipo de Pago</label>
+                                <select
+                                    id="paymentType"
+                                    value={idPaymentType}
+                                    onChange={(e) => setIdPaymentType(e.target.value)}
+                                    className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary"
+                                    required
+                                >
+                                    <option value="" disabled>Seleccione...</option>
+                                    {paymentTypes.map(type => (
+                                        <option key={type.id} value={type.id}>{type.description}</option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
                     </div>
+                    {/* === FIN DE CAMBIOS === */}
 
                     <div className="flex justify-end gap-4 pt-8">
                         <button type="button" onClick={onClose} className="px-6 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 font-semibold transition-colors">Cancelar</button>
