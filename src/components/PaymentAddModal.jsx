@@ -1,0 +1,112 @@
+import React, { useState, useEffect } from 'react';
+import Icon from './ui/Icon';
+import ErrorModal from './ui/ErrorModal';
+import { fetchData, createData } from '../services/api';
+
+const DetailField = ({ label, value }) => (
+    <div>
+        <p className="text-sm font-medium text-dark-text-secondary">{label}</p>
+        <p className="text-lg text-dark-text-primary font-semibold">{value}</p>
+    </div>
+);
+
+const PaymentAddModal = ({ scheduleItem, onClose, onSave }) => {
+    const [idPaymentType, setIdPaymentType] = useState('');
+    const [paymentTypes, setPaymentTypes] = useState([]);
+    const [isSaving, setIsSaving] = useState(false);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        // Cargar los tipos de pago cuando el modal se monta
+        const loadPaymentTypes = async () => {
+            try {
+                const data = await fetchData('/payment-type');
+                setPaymentTypes(data);
+                // Opcional: seleccionar el primero por defecto
+                if (data.length > 0) {
+                    setIdPaymentType(data[0].id);
+                }
+            } catch (err) {
+                setError('No se pudieron cargar los tipos de pago.');
+            }
+        };
+        loadPaymentTypes();
+    }, []);
+
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(amount);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!idPaymentType) {
+            setError('Debe seleccionar un tipo de pago.');
+            return;
+        }
+
+        setIsSaving(true);
+        setError('');
+
+        const payload = {
+            paymentDate: new Date().toISOString(),
+            idPaymentType: parseInt(idPaymentType, 10),
+            idPaymentSchedule: scheduleItem.id,
+        };
+
+        try {
+            await createData('/payments', payload);
+            onSave(); // Llama a la función onSave para que el padre refresque la lista
+        } catch (err) {
+            setError(err.message || 'Ocurrió un error al registrar el pago.');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    return (
+        <>
+            <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[60]">
+                <form onSubmit={handleSubmit} className="bg-dark-surface rounded-lg shadow-2xl w-full max-w-md p-8 m-4">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-2xl font-bold text-dark-text-primary">Registrar Pago</h2>
+                        <button type="button" onClick={onClose} className="text-dark-text-secondary hover:text-dark-text-primary">
+                            <Icon path="M6 18L18 6M6 6l12 12" className="w-6 h-6" />
+                        </button>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="bg-dark-bg/50 p-4 rounded-lg space-y-3">
+                            <DetailField label="Concepto" value={scheduleItem.conceptType.description} />
+                            <DetailField label="Monto a Pagar" value={formatCurrency(scheduleItem.installmentAmount)} />
+                        </div>
+                        <div>
+                            <label htmlFor="paymentType" className="block text-sm font-medium text-dark-text-secondary mb-2">Tipo de Pago</label>
+                            <select
+                                id="paymentType"
+                                value={idPaymentType}
+                                onChange={(e) => setIdPaymentType(e.target.value)}
+                                className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary"
+                                required
+                            >
+                                <option value="" disabled>Seleccione...</option>
+                                {paymentTypes.map(type => (
+                                    <option key={type.id} value={type.id}>{type.description}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end gap-4 pt-8">
+                        <button type="button" onClick={onClose} className="px-6 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 font-semibold transition-colors">Cancelar</button>
+                        <button type="submit" disabled={isSaving} className="px-6 py-2 bg-brand-accent text-white rounded-lg hover:bg-blue-600 font-semibold shadow transition-colors disabled:bg-slate-500 disabled:cursor-wait">
+                            {isSaving ? 'Procesando...' : 'Confirmar Pago'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {error && <ErrorModal message={error} onClose={() => setError('')} />}
+        </>
+    );
+};
+
+export default PaymentAddModal;
