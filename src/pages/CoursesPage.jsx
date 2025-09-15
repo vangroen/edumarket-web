@@ -17,9 +17,29 @@ const ModalityPill = ({ modality }) => {
     return <span className={pillClasses}>{modality}</span>;
 };
 
+// --- NUEVO: Componente para la fila "esqueleto" de Cursos ---
+const CourseSkeletonRow = () => (
+    <tr className="animate-pulse">
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-5/6"></div></td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-2/3"></div></td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-20"></div></td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-24"></div></td>
+        <td className="px-6 py-4"><div className="h-6 bg-slate-700 rounded-full w-24"></div></td>
+        <td className="px-6 py-4"><div className="h-6 bg-slate-700 rounded-full w-28"></div></td>
+        <td className="px-6 py-4">
+            <div className="flex items-center space-x-4">
+                <div className="h-5 w-5 bg-slate-700 rounded"></div>
+                <div className="h-5 w-5 bg-slate-700 rounded"></div>
+            </div>
+        </td>
+    </tr>
+);
+
 const CoursesPage = () => {
+    // ... (estados no cambian)
     const [courses, setCourses] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    // ... (el resto de los estados)
     const [error, setError] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingCourse, setEditingCourse] = useState(null);
@@ -36,6 +56,8 @@ const CoursesPage = () => {
         setIsLoading(true);
         setError(null);
         try {
+            // Simulación de carga
+            await new Promise(resolve => setTimeout(resolve, 1500));
             const coursesData = await fetchData('/courses');
             setCourses(coursesData);
         } catch (err) {
@@ -49,6 +71,7 @@ const CoursesPage = () => {
         loadCourses();
     }, []);
 
+    // ... (el resto de las funciones no cambian)
     const loadModalDataAndOpen = async (openAction) => {
         if (isModalDataLoaded) {
             openAction();
@@ -85,16 +108,12 @@ const CoursesPage = () => {
         });
     };
 
-    const handleCloseEditModal = () => {
-        setIsEditModalOpen(false);
-        setEditingCourse(null);
-    };
-
     const handleSaveChanges = async (updatedData) => {
         if (!editingCourse) return;
         try {
             await updateData(`/courses/${editingCourse.id}`, updatedData);
-            handleCloseEditModal();
+            setIsEditModalOpen(false);
+            setEditingCourse(null);
             loadCourses();
         } catch (err) {
             setError("No se pudo actualizar el curso. Revisa la consola para más detalles.");
@@ -107,14 +126,10 @@ const CoursesPage = () => {
         });
     };
 
-    const handleCloseAddModal = () => {
-        setIsAddModalOpen(false);
-    };
-
     const handleCreateCourse = async (newCourseData) => {
         try {
             await createData('/courses', newCourseData);
-            handleCloseAddModal();
+            setIsAddModalOpen(false);
             loadCourses();
         } catch (err) {
             setError("No se pudo crear el curso.");
@@ -126,17 +141,13 @@ const CoursesPage = () => {
         setIsDeleteModalOpen(true);
     };
 
-    const handleCloseDeleteModal = () => {
-        setIsDeleteModalOpen(false);
-        setDeletingCourse(null);
-    };
-
     const handleConfirmDelete = async () => {
         if (!deletingCourse) return;
         try {
             setError(null);
             await deleteData(`/courses/${deletingCourse.id}`);
-            handleCloseDeleteModal();
+            setIsDeleteModalOpen(false);
+            setDeletingCourse(null);
             loadCourses();
         } catch (err) {
             setError("No se pudo eliminar el curso. Inténtalo de nuevo.");
@@ -145,6 +156,7 @@ const CoursesPage = () => {
 
     return (
         <div>
+            {/* ... (Cabecera de la página no cambia) ... */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8">
                 <div>
                     <h1 className="text-3xl font-bold text-dark-text-primary">Gestión de Cursos</h1>
@@ -168,65 +180,66 @@ const CoursesPage = () => {
                 <div className="overflow-x-auto">
                     <table className="min-w-full">
                         <thead className="border-b border-dark-border">
-                            <tr>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Nombre del Curso</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Instituciones</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Duración</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Costo</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Modalidad</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Tipo</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Acciones</th>
-                            </tr>
+                        <tr>
+                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Nombre del Curso</th>
+                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Instituciones</th>
+                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Duración</th>
+                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Costo</th>
+                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Modalidad</th>
+                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Tipo</th>
+                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Acciones</th>
+                        </tr>
                         </thead>
-                        {!isLoading && !error && (
-                            <tbody className="divide-y divide-dark-border">
-                                {courses.map((course) => (
-                                    <tr key={course.id} className="hover:bg-slate-700/50 transition-colors duration-150">
-                                        <td className="px-6 py-4 text-sm font-medium text-dark-text-primary align-top">{course.name}</td>
-                                        <td className="px-6 py-4 text-sm text-dark-text-primary align-top">
-                                            <div className="flex flex-col gap-y-2">
-                                                {course.institutions.map(({ institution }) => (
-                                                    <div key={institution.id} className="truncate" title={institution.name}>{institution.name}</div>
-                                                ))}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-dark-text-secondary align-top whitespace-nowrap">
-                                            <div className="flex flex-col gap-y-2">
-                                                {course.institutions.map(({ institution, durationInMonths }) => (
-                                                    <div key={institution.id}>{durationInMonths} meses</div>
-                                                ))}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-dark-text-secondary align-top whitespace-nowrap">
-                                            <div className="flex flex-col gap-y-2">
-                                                {course.institutions.map(({ institution, price }) => (
-                                                    <div key={institution.id}>{formatCurrency(price)}</div>
-                                                ))}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm align-top">
-                                            <CourseTypePill type={course.courseType.description} />
-                                        </td>
-                                        <td className="px-6 py-4 text-sm align-top">
-                                            <ModalityPill modality={course.modality.description} />
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-dark-text-secondary align-top">
-                                            <div className="flex items-center space-x-4">
-                                                <button onClick={() => handleEditClick(course)} disabled={isOpeningModal} className="hover:text-dark-text-primary disabled:text-slate-600 disabled:cursor-wait" title="Editar curso">
-                                                    <Icon path="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" className="w-5 h-5" />
-                                                </button>
-                                                <button onClick={() => handleDeleteClick(course)} className="hover:text-red-500" title="Eliminar curso">
-                                                    <Icon path="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.036-2.134H8.718c-1.126 0-2.037.955-2.037 2.134v.916m7.5 0a48.667 48.667 0 00-7.5 0" className="w-5 h-5" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
+                        <tbody className="divide-y divide-dark-border">
+                        {isLoading ? (
+                            [...Array(5)].map((_, index) => <CourseSkeletonRow key={index} />)
+                        ) : (
+                            !error && courses.map((course) => (
+                                <tr key={course.id} className="hover:bg-slate-700/50 transition-colors duration-150">
+                                    <td className="px-6 py-4 text-sm font-medium text-dark-text-primary align-top">{course.name}</td>
+                                    <td className="px-6 py-4 text-sm text-dark-text-primary align-top">
+                                        <div className="flex flex-col gap-y-2">
+                                            {course.institutions.map(({ institution }) => (
+                                                <div key={institution.id} className="truncate" title={institution.name}>{institution.name}</div>
+                                            ))}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top whitespace-nowrap">
+                                        <div className="flex flex-col gap-y-2">
+                                            {course.institutions.map(({ institution, durationInMonths }) => (
+                                                <div key={institution.id}>{durationInMonths} meses</div>
+                                            ))}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top whitespace-nowrap">
+                                        <div className="flex flex-col gap-y-2">
+                                            {course.institutions.map(({ institution, price }) => (
+                                                <div key={institution.id}>{formatCurrency(price)}</div>
+                                            ))}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm align-top">
+                                        <ModalityPill modality={course.modality.description} />
+                                    </td>
+                                    <td className="px-6 py-4 text-sm align-top">
+                                        <CourseTypePill type={course.courseType.description} />
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary align-top">
+                                        <div className="flex items-center space-x-4">
+                                            <button onClick={() => handleEditClick(course)} disabled={isOpeningModal} className="hover:text-dark-text-primary disabled:text-slate-600 disabled:cursor-wait" title="Editar curso">
+                                                <Icon path="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" className="w-5 h-5" />
+                                            </button>
+                                            <button onClick={() => handleDeleteClick(course)} className="hover:text-red-500" title="Eliminar curso">
+                                                <Icon path="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.036-2.134H8.718c-1.126 0-2.037.955-2.037 2.134v.916m7.5 0a48.667 48.667 0 00-7.5 0" className="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
                         )}
+                        </tbody>
                     </table>
                 </div>
-                {isLoading && <p className="p-4 text-center text-dark-text-secondary">Cargando cursos...</p>}
                 {error && <p className="p-4 text-center text-red-400">{error}</p>}
                 {!isLoading && !error && courses.length === 0 && <p className="p-4 text-center text-dark-text-secondary">No se encontraron cursos.</p>}
                 <div className="flex justify-between items-center p-4 text-sm text-dark-text-secondary">
@@ -234,10 +247,11 @@ const CoursesPage = () => {
                 </div>
             </div>
 
+            {/* ... (resto de los modales no cambian) ... */}
             {isEditModalOpen && (
                 <CourseEditModal
                     course={editingCourse}
-                    onClose={handleCloseEditModal}
+                    onClose={() => setIsEditModalOpen(false)}
                     onSave={handleSaveChanges}
                     courseTypes={courseTypes}
                     modalities={modalities}
@@ -246,7 +260,7 @@ const CoursesPage = () => {
             )}
             {isAddModalOpen && (
                 <CourseAddModal
-                    onClose={handleCloseAddModal}
+                    onClose={() => setIsAddModalOpen(false)}
                     onSave={handleCreateCourse}
                     courseTypes={courseTypes}
                     modalities={modalities}
@@ -257,7 +271,7 @@ const CoursesPage = () => {
                 <ConfirmDeleteModal
                     itemType="el curso"
                     itemName={deletingCourse?.name}
-                    onClose={handleCloseDeleteModal}
+                    onClose={() => setIsDeleteModalOpen(false)}
                     onConfirm={handleConfirmDelete}
                 />
             )}

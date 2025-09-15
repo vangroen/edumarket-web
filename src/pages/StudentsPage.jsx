@@ -6,21 +6,35 @@ import StudentEditModal from '../components/StudentEditModal';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import {fetchData, createData, updateData, deleteData} from '../services/api';
 
+// --- NUEVO: Componente para la fila "esqueleto" de Estudiantes ---
+const StudentSkeletonRow = () => (
+    <tr className="animate-pulse">
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-3/4"></div></td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-5/6"></div></td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-28"></div></td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-full"></div></td>
+        <td className="px-6 py-4">
+            <div className="flex items-center space-x-4">
+                <div className="h-5 w-5 bg-slate-700 rounded"></div>
+                <div className="h-5 w-5 bg-slate-700 rounded"></div>
+                <div className="h-5 w-5 bg-slate-700 rounded"></div>
+            </div>
+        </td>
+    </tr>
+);
+
 const StudentsPage = () => {
+    // ... (los estados no cambian)
     const [students, setStudents] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    // Estados para los modales
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingStudent, setEditingStudent] = useState(null);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState(null);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // 3. Nuevo estado para el modal de eliminar
-    const [deletingStudent, setDeletingStudent] = useState(null); // Guarda el estudiante a eliminar
-
-    // Estados para los datos de los formularios
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [deletingStudent, setDeletingStudent] = useState(null);
     const [catalogs, setCatalogs] = useState({
         documentTypes: [],
         professions: [],
@@ -30,11 +44,12 @@ const StudentsPage = () => {
     const [isModalDataLoaded, setIsModalDataLoaded] = useState(false);
     const [isOpeningModal, setIsOpeningModal] = useState(false);
 
-    // Carga la lista principal de estudiantes
     const loadStudents = async () => {
         setIsLoading(true);
         setError(null);
         try {
+            // Simulación de carga
+            await new Promise(resolve => setTimeout(resolve, 1500));
             const data = await fetchData('/students');
             setStudents(Array.isArray(data) ? data : []);
         } catch (err) {
@@ -49,7 +64,7 @@ const StudentsPage = () => {
         loadStudents();
     }, []);
 
-    // Carga los catálogos necesarios para los modales de "Añadir" y "Editar"
+    // ... (el resto de las funciones no cambian)
     const loadCatalogsAndOpen = async (action) => {
         if (isModalDataLoaded) {
             action();
@@ -70,7 +85,7 @@ const StudentsPage = () => {
                 academicRanks: ranks,
             });
             setIsModalDataLoaded(true);
-            action(); // Ejecuta la acción (abrir modal de añadir o editar)
+            action();
         } catch (err) {
             setError("No se pudieron cargar los datos para el formulario.");
         } finally {
@@ -78,9 +93,6 @@ const StudentsPage = () => {
         }
     };
 
-    // --- MANEJADORES DE ACCIONES CRUD ---
-
-    // AÑADIR
     const handleAddClick = () => {
         loadCatalogsAndOpen(() => setIsAddModalOpen(true));
     };
@@ -88,7 +100,6 @@ const StudentsPage = () => {
     const handleCreateStudent = async (formData) => {
         try {
             let personIdToUse = formData.idPerson;
-
             if (!personIdToUse) {
                 const personPayload = {
                     firstName: formData.firstName,
@@ -102,7 +113,6 @@ const StudentsPage = () => {
                 const newPerson = await createData('/person', personPayload);
                 personIdToUse = newPerson.id;
             }
-
             const studentPayload = {
                 idProfession: parseInt(formData.idProfession, 10),
                 idInstitution: parseInt(formData.idInstitution, 10),
@@ -110,11 +120,9 @@ const StudentsPage = () => {
                 idPerson: personIdToUse,
             };
             await createData('/students', studentPayload);
-
             setIsAddModalOpen(false);
             loadStudents();
         } catch (err) {
-            // --- LÓGICA MEJORADA PARA CAPTURAR EL ERROR ---
             if (err.message && err.message.includes('409')) {
                 try {
                     const jsonString = err.message.substring(err.message.indexOf('{'));
@@ -124,14 +132,12 @@ const StudentsPage = () => {
                     throw new Error('Esta persona ya está registrada como estudiante.');
                 }
             }
-
             setError("Ocurrió un error al crear el estudiante.");
             console.error(err);
             throw err;
         }
     };
 
-    // EDITAR
     const handleEditClick = (student) => {
         loadCatalogsAndOpen(() => {
             setEditingStudent(student);
@@ -152,7 +158,6 @@ const StudentsPage = () => {
                 idDocumentType: parseInt(formData.idDocumentType, 10),
             };
             await updateData(`/person/${editingStudent.person.id}`, personPayload);
-
             const studentPayload = {
                 idProfession: parseInt(formData.idProfession, 10),
                 idInstitution: parseInt(formData.idInstitution, 10),
@@ -160,11 +165,9 @@ const StudentsPage = () => {
                 idPerson: editingStudent.person.id,
             };
             await updateData(`/students/${editingStudent.id}`, studentPayload);
-
             setIsEditModalOpen(false);
             loadStudents();
         } catch (err) {
-            // --- LÓGICA MEJORADA PARA CAPTURAR EL ERROR ---
             if (err.message && err.message.includes('409')) {
                 try {
                     const jsonString = err.message.substring(err.message.indexOf('{'));
@@ -174,53 +177,30 @@ const StudentsPage = () => {
                     throw new Error('El número de documento ya está en uso por otra persona.');
                 }
             }
-
             setError("Ocurrió un error al actualizar el estudiante.");
             console.error(err);
             throw err;
         }
     };
 
-    // VER DETALLES
     const handleViewDetails = (student) => {
         setSelectedStudent(student);
         setIsDetailsModalOpen(true);
     };
 
-    const handleCloseDetailsModal = () => {
-        setIsDetailsModalOpen(false);
-        setSelectedStudent(null);
-    };
-
-    // --- 4. NUEVOS MANEJADORES PARA LA ELIMINACIÓN ---
-
-    // Abre el modal de confirmación
     const handleDeleteClick = (student) => {
         setDeletingStudent(student);
         setIsDeleteModalOpen(true);
     };
 
-    // Cierra el modal de confirmación
-    const handleCloseDeleteModal = () => {
-        setIsDeleteModalOpen(false);
-        setDeletingStudent(null);
-    };
-
-    // Ejecuta la eliminación en dos pasos si el usuario confirma
     const handleConfirmDelete = async () => {
         if (!deletingStudent) return;
         try {
             setError(null);
-            // Paso 1: Eliminar el estudiante
             await deleteData(`/students/${deletingStudent.id}`);
-
-            // Paso 2: Eliminar la persona asociada
             await deleteData(`/person/${deletingStudent.person.id}`);
-
-            // Si todo fue exitoso:
-            handleCloseDeleteModal(); // Cierra el modal
-            loadStudents(); // Recarga la lista de estudiantes
-
+            setIsDeleteModalOpen(false);
+            loadStudents();
         } catch (err) {
             setError("No se pudo eliminar el estudiante. Inténtalo de nuevo.");
             console.error(err);
@@ -229,6 +209,7 @@ const StudentsPage = () => {
 
     return (
         <div>
+            {/* ... (Cabecera de la página no cambia) ... */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8">
                 <div>
                     <h1 className="text-3xl font-bold text-dark-text-primary">Gestión de Estudiantes</h1>
@@ -259,9 +240,7 @@ const StudentsPage = () => {
                     <table className="min-w-full">
                         <thead className="bg-slate-800">
                         <tr>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Nombre
-                                Completo
-                            </th>
+                            <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Nombre Completo</th>
                             <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Email</th>
                             <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Teléfono</th>
                             <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Documento</th>
@@ -269,42 +248,44 @@ const StudentsPage = () => {
                         </tr>
                         </thead>
                         <tbody className="divide-y divide-dark-border">
-                        {!isLoading && !error && students.map((student) => (
-                            <tr key={student.id} className="hover:bg-slate-700/50 transition-colors duration-150">
-                                <td className="px-6 py-4 text-sm font-medium text-dark-text-primary whitespace-nowrap">{`${student.person.firstName} ${student.person.lastName}`}</td>
-                                <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap">{student.person.email}</td>
-                                <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap">{student.person.phone}</td>
-                                <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap">
-                                    {`${student.person.documentType.description}: ${student.person.documentNumber}`}
-                                </td>
-                                <td className="px-6 py-4 text-sm text-dark-text-secondary">
-                                    <div className="flex items-center space-x-4">
-                                        <button onClick={() => handleViewDetails(student)}
-                                                className="hover:text-dark-text-primary" title="Ver detalles">
-                                            <Icon
-                                                path="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                                className="w-5 h-5"/>
-                                        </button>
-                                        <button onClick={() => handleEditClick(student)}
-                                                className="hover:text-dark-text-primary" title="Editar estudiante">
-                                            <Icon
-                                                path="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"
-                                                className="w-5 h-5"/>
-                                        </button>
-                                        {/* 5. Conectar el botón de eliminar con su manejador */}
-                                        <button onClick={() => handleDeleteClick(student)}
-                                                className="hover:text-red-500" title="Eliminar estudiante">
-                                            <Icon
-                                                path="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.036-2.134H8.718c-1.126 0-2.037.955-2.037 2.134v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                                                className="w-5 h-5"/>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
+                        {isLoading ? (
+                            [...Array(5)].map((_, index) => <StudentSkeletonRow key={index} />)
+                        ) : (
+                            !error && students.map((student) => (
+                                <tr key={student.id} className="hover:bg-slate-700/50 transition-colors duration-150">
+                                    <td className="px-6 py-4 text-sm font-medium text-dark-text-primary whitespace-nowrap">{`${student.person.firstName} ${student.person.lastName}`}</td>
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap">{student.person.email}</td>
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap">{student.person.phone}</td>
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap">
+                                        {`${student.person.documentType.description}: ${student.person.documentNumber}`}
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-dark-text-secondary">
+                                        <div className="flex items-center space-x-4">
+                                            <button onClick={() => handleViewDetails(student)}
+                                                    className="hover:text-dark-text-primary" title="Ver detalles">
+                                                <Icon
+                                                    path="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                                    className="w-5 h-5"/>
+                                            </button>
+                                            <button onClick={() => handleEditClick(student)}
+                                                    className="hover:text-dark-text-primary" title="Editar estudiante">
+                                                <Icon
+                                                    path="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"
+                                                    className="w-5 h-5"/>
+                                            </button>
+                                            <button onClick={() => handleDeleteClick(student)}
+                                                    className="hover:text-red-500" title="Eliminar estudiante">
+                                                <Icon
+                                                    path="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.036-2.134H8.718c-1.126 0-2.037.955-2.037 2.134v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                                                    className="w-5 h-5"/>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                         </tbody>
                     </table>
-                    {isLoading && <p className="p-4 text-center text-dark-text-secondary">Cargando estudiantes...</p>}
                     {error && <p className="p-4 text-center text-red-400">{error}</p>}
                     {!isLoading && !error && students.length === 0 &&
                         <p className="p-4 text-center text-dark-text-secondary">No se encontraron estudiantes.</p>}
@@ -317,6 +298,7 @@ const StudentsPage = () => {
             {isDetailsModalOpen && (
                 <StudentDetailsModal student={selectedStudent} onClose={() => setIsDetailsModalOpen(false)}/>
             )}
+            {/* ... (resto de los modales no cambian) ... */}
             {isAddModalOpen && (
                 <StudentAddModal onClose={() => setIsAddModalOpen(false)} onSave={handleCreateStudent}
                                  catalogs={catalogs}/>
@@ -325,12 +307,11 @@ const StudentsPage = () => {
                 <StudentEditModal student={editingStudent} onClose={() => setIsEditModalOpen(false)}
                                   onSave={handleUpdateStudent} catalogs={catalogs}/>
             )}
-            {/* 6. Renderizado condicional del nuevo modal de confirmación */}
             {isDeleteModalOpen && (
                 <ConfirmDeleteModal
                     itemType="al estudiante"
                     itemName={deletingStudent ? `${deletingStudent.person.firstName} ${deletingStudent.person.lastName}` : ''}
-                    onClose={handleCloseDeleteModal}
+                    onClose={() => setIsDeleteModalOpen(false)}
                     onConfirm={handleConfirmDelete}
                 />
             )}

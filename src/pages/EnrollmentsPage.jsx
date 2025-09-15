@@ -4,13 +4,21 @@ import EnrollmentDetailsModal from '../components/EnrollmentDetailsModal';
 import EnrollmentAddModal from '../components/EnrollmentAddModal';
 import { fetchData, createData } from '../services/api';
 
-const StatusPill = ({ active }) => {
-    const pillClasses = `px-3 py-1 text-xs font-semibold rounded-full capitalize ${
-        active ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'
-    }`;
-    return <span className={pillClasses}>{active ? 'Activa' : 'Inactiva'}</span>;
-};
-
+// --- NUEVO: Componente para la fila "esqueleto" de Matrículas ---
+const EnrollmentSkeletonRow = () => (
+    <tr className="animate-pulse">
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-3/4"></div></td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-5/6"></div></td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-2/3"></div></td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-24"></div></td>
+        <td className="px-6 py-4"><div className="h-4 bg-slate-700 rounded w-28"></div></td>
+        <td className="px-6 py-4">
+            <div className="flex items-center space-x-4">
+                <div className="h-5 w-5 bg-slate-700 rounded"></div>
+            </div>
+        </td>
+    </tr>
+);
 
 const EnrollmentsPage = () => {
     const [enrollments, setEnrollments] = useState([]);
@@ -30,6 +38,8 @@ const EnrollmentsPage = () => {
         setIsLoading(true);
         setError(null);
         try {
+            // Simulación de carga
+            await new Promise(resolve => setTimeout(resolve, 1500));
             const data = await fetchData('/enrollment');
             setEnrollments(Array.isArray(data) ? data : []);
         } catch (err) {
@@ -44,7 +54,7 @@ const EnrollmentsPage = () => {
         loadEnrollments();
     }, []);
 
-    // Funciones para manejar el modal de añadir
+    // ... (el resto de las funciones no cambian)
     const loadCatalogsAndOpen = async (action) => {
         if (isModalDataLoaded) {
             action();
@@ -82,11 +92,9 @@ const EnrollmentsPage = () => {
             loadEnrollments();
         } catch (err) {
             console.error(err);
-            // El error se mostrará en el modal, pero lanzamos para que el modal sepa que falló
             throw err;
         }
     };
-
 
     const handleViewDetails = (enrollment) => {
         setSelectedEnrollment(enrollment);
@@ -144,9 +152,11 @@ const EnrollmentsPage = () => {
                             <th className="px-6 py-4 text-left text-sm font-semibold text-dark-text-primary uppercase tracking-wider">Acciones</th>
                         </tr>
                         </thead>
-                        {!isLoading && !error && (
-                            <tbody className="divide-y divide-dark-border">
-                            {enrollments.map((enroll) => (
+                        <tbody className="divide-y divide-dark-border">
+                        {isLoading ? (
+                            [...Array(5)].map((_, index) => <EnrollmentSkeletonRow key={index} />)
+                        ) : (
+                            !error && enrollments.map((enroll) => (
                                 <tr key={enroll.id} className="hover:bg-slate-700/50 transition-colors duration-150">
                                     <td className="px-6 py-4 text-sm text-dark-text-primary align-top">
                                         <div className="max-w-xs" title={`${enroll.student.person.firstName} ${enroll.student.person.lastName}`}>
@@ -180,12 +190,11 @@ const EnrollmentsPage = () => {
                                         </div>
                                     </td>
                                 </tr>
-                            ))}
-                            </tbody>
+                            ))
                         )}
+                        </tbody>
                     </table>
                 </div>
-                {isLoading && <p className="p-4 text-center text-dark-text-secondary">Cargando matrículas...</p>}
                 {error && <p className="p-4 text-center text-red-400">{error}</p>}
                 {!isLoading && !error && enrollments.length === 0 &&
                     <p className="p-4 text-center text-dark-text-secondary">No se encontraron matrículas.</p>}
