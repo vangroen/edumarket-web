@@ -53,7 +53,7 @@ const EnrollmentDetailsModal = ({enrollment, onClose}) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 p-4">
-            <div className="bg-dark-surface rounded-lg shadow-2xl w-full max-w-4xl flex flex-col max-h-full">
+            <div className="bg-dark-surface rounded-lg shadow-2xl w-full max-w-4xl flex flex-col h-[90vh]">
 
                 <div className="flex justify-between items-center p-8 pb-4 flex-shrink-0">
                     <h2 className="text-2xl font-bold text-dark-text-primary">Detalles de la Matrícula</h2>
@@ -87,65 +87,64 @@ const EnrollmentDetailsModal = ({enrollment, onClose}) => {
                     </nav>
                 </div>
 
-                {/* Contenedor de contenido principal que ahora gestiona el scroll */}
-                <div className="flex-1 overflow-y-auto p-8">
-                    {activeTab === 'details' && (
-                        // El div interior ya no necesita gestionar el scroll
-                        <div className="space-y-10 animate-fade-in pr-2"> {/* Padding a la derecha para el scrollbar */}
-                            <div>
-                                <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Información General</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
-                                    <DetailField label="Curso" value={enrollment.course.name}/>
-                                    <DetailField label="Institución" value={enrollment.institution.name}/>
-                                    <DetailField label="Tipo de Institución">
-                                        <TypePill type={enrollment.institution.institutionType.description}/>
-                                    </DetailField>
-                                    <DetailField label="Costo de Matrícula" value={formatCurrency(enrollment.enrollmentFeeAmount)}/>
-                                    <DetailField label="Pago Mensual" value={formatCurrency(enrollment.monthlyFeeAmount)}/>
-                                    <DetailField label="Derechos Finales" value={formatCurrency(enrollment.finalRightsAmount)}/>
-                                    <DetailField label="Duración del curso">
-                                        <DurationPill months={enrollment.course.durationInMonths}/>
-                                    </DetailField>
-                                    <DetailField label="Costo Total" value={formatCurrency(enrollment.totalEnrollmentCost)}/>
-                                    <DetailField label="Fecha de Matrícula" value={formatDate(enrollment.enrollmentDate)}/>
+                <div className="flex-1 overflow-y-auto">
+                    <div className="p-8">
+                        {activeTab === 'details' && (
+                            <div className="space-y-10 animate-fade-in">
+                                <div>
+                                    <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Información General</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
+                                        <DetailField label="Curso" value={enrollment.course.name}/>
+                                        <DetailField label="Institución" value={enrollment.institution.name}/>
+                                        <DetailField label="Tipo de Institución">
+                                            <TypePill type={enrollment.institution.institutionType.description}/>
+                                        </DetailField>
+                                        <DetailField label="Costo de Matrícula" value={formatCurrency(enrollment.enrollmentFeeAmount)}/>
+                                        <DetailField label="Pago Mensual" value={formatCurrency(enrollment.monthlyFeeAmount)}/>
+                                        <DetailField label="Derechos Finales" value={formatCurrency(enrollment.finalRightsAmount)}/>
+                                        <DetailField label="Duración del curso">
+                                            <DurationPill months={enrollment.course.durationInMonths}/>
+                                        </DetailField>
+                                        <DetailField label="Costo Total" value={formatCurrency(enrollment.totalEnrollmentCost)}/>
+                                        <DetailField label="Fecha de Matrícula" value={formatDate(enrollment.enrollmentDate)}/>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Datos del Estudiante</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
+                                        <DetailField label="Nombres y Apellidos" value={`${enrollment.student.person.firstName} ${enrollment.student.person.lastName}`}/>
+                                        <DetailField label="Tipo de Documento"><DocumentPill type={enrollment.student.person.documentType.description}/></DetailField>
+                                        <DetailField label="Número de Documento" value={enrollment.student.person.documentNumber}/>
+                                        <DetailField label="Email" value={enrollment.student.person.email}/>
+                                        <DetailField label="Teléfono" value={enrollment.student.person.phone}/>
+                                        <DetailField label="Dirección" value={enrollment.student.person.address}/>
+                                        <DetailField label="Rango Académico"><AcademicRankPill rank={enrollment.student.academicRank.description}/></DetailField>
+                                        <DetailField label="Profesión" value={enrollment.student.profession.name}/>
+                                        <DetailField label="Institución de Origen" value={enrollment.student.institution.name}/>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Datos del Agente</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
+                                        <DetailField label="Nombres y Apellidos" value={`${enrollment.agent.person.firstName} ${enrollment.agent.person.lastName}`}/>
+                                        <DetailField label="Tipo de Documento"><DocumentPill type={enrollment.agent.person.documentType.description}/></DetailField>
+                                        <DetailField label="Número de Documento" value={enrollment.agent.person.documentNumber}/>
+                                        <DetailField label="Email" value={enrollment.agent.person.email}/>
+                                        <DetailField label="Teléfono" value={enrollment.agent.person.phone}/>
+                                        <DetailField label="Dirección" value={enrollment.agent.person.address}/>
+                                    </div>
                                 </div>
                             </div>
-                            <div>
-                                <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Datos del Estudiante</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
-                                    <DetailField label="Nombres y Apellidos" value={`${enrollment.student.person.firstName} ${enrollment.student.person.lastName}`}/>
-                                    <DetailField label="Tipo de Documento"><DocumentPill type={enrollment.student.person.documentType.description}/></DetailField>
-                                    <DetailField label="Número de Documento" value={enrollment.student.person.documentNumber}/>
-                                    <DetailField label="Email" value={enrollment.student.person.email}/>
-                                    <DetailField label="Teléfono" value={enrollment.student.person.phone}/>
-                                    <DetailField label="Dirección" value={enrollment.student.person.address}/>
-                                    <DetailField label="Rango Académico"><AcademicRankPill rank={enrollment.student.academicRank.description}/></DetailField>
-                                    <DetailField label="Profesión" value={enrollment.student.profession.name}/>
-                                    <DetailField label="Institución de Origen" value={enrollment.student.institution.name}/>
-                                </div>
-                            </div>
-                            <div>
-                                <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Datos del Agente</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
-                                    <DetailField label="Nombres y Apellidos" value={`${enrollment.agent.person.firstName} ${enrollment.agent.person.lastName}`}/>
-                                    <DetailField label="Tipo de Documento"><DocumentPill type={enrollment.agent.person.documentType.description}/></DetailField>
-                                    <DetailField label="Número de Documento" value={enrollment.agent.person.documentNumber}/>
-                                    <DetailField label="Email" value={enrollment.agent.person.email}/>
-                                    <DetailField label="Teléfono" value={enrollment.agent.person.phone}/>
-                                    <DetailField label="Dirección" value={enrollment.agent.person.address}/>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                        )}
 
-                    {activeTab === 'schedule' && (
-                        <div className="animate-fade-in">
-                            <PaymentSchedule enrollmentId={enrollment.id} />
-                        </div>
-                    )}
+                        {activeTab === 'schedule' && (
+                            <div className="animate-fade-in">
+                                <PaymentSchedule enrollmentId={enrollment.id} />
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                {/* Pie de página responsivo */}
                 <div className="flex-shrink-0 flex justify-end p-4 border-t border-dark-border">
                     <button
                         type="button"

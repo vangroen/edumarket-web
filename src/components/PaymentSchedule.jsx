@@ -114,7 +114,7 @@ const PaymentSchedule = ({ enrollmentId }) => {
                         <th className="px-6 py-3 text-center text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Acciones</th>
                     </tr>
                     </thead>
-                    <tbody className="divide-y divide-dark-border">{[...Array(5)].map((_, index) => <ScheduleSkeletonRow key={index} />)}</tbody>
+                    <tbody className="divide-y divide-dark-border">{[...Array(6)].map((_, index) => <ScheduleSkeletonRow key={index} />)}</tbody>
                 </table>
             </div>
         );
