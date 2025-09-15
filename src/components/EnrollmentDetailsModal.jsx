@@ -65,24 +65,24 @@ const EnrollmentDetailsModal = ({enrollment, onClose}) => {
                 </div>
 
                 {/* --- SECCIÓN DE PESTAÑAS CON ESTILO HÍBRIDO (RECUADRO + SUBRAYADO) --- */}
-                <div className="px-8 pt-2">
-                    <nav className="flex space-x-2">
+                <div className="px-8 border-b border-dark-border">
+                    <nav className="flex space-x-2 -mb-px">
                         <button
                             onClick={() => setActiveTab('details')}
-                            className={`px-4 py-2 font-semibold text-sm rounded-t-lg transition-colors focus:outline-none border-b-2 ${
+                            className={`px-4 py-3 font-semibold text-sm rounded-t-lg transition-colors focus:outline-none border ${
                                 activeTab === 'details'
-                                    ? 'bg-dark-bg text-dark-text-primary border-brand-accent' // Activa: fondo oscuro, texto primario y borde azul
-                                    : 'text-dark-text-secondary bg-dark-surface hover:bg-slate-700/50 hover:text-dark-text-primary border-transparent' // Inactiva: fondo superficie y borde transparente
+                                    ? 'text-brand-accent bg-dark-surface border-dark-border border-b-dark-surface' // Pestaña activa
+                                    : 'text-dark-text-secondary border-transparent hover:text-dark-text-primary'    // Pestaña inactiva
                             }`}
                         >
                             Detalles Generales
                         </button>
                         <button
                             onClick={() => setActiveTab('schedule')}
-                            className={`px-4 py-2 font-semibold text-sm rounded-t-lg transition-colors focus:outline-none border-b-2 ${
+                            className={`px-4 py-3 font-semibold text-sm rounded-t-lg transition-colors focus:outline-none border ${
                                 activeTab === 'schedule'
-                                    ? 'bg-dark-bg text-dark-text-primary border-brand-accent' // Activa
-                                    : 'text-dark-text-secondary bg-dark-surface hover:bg-slate-700/50 hover:text-dark-text-primary border-transparent' // Inactiva
+                                    ? 'text-brand-accent bg-dark-surface border-dark-border border-b-dark-surface' // Pestaña activa
+                                    : 'text-dark-text-secondary border-transparent hover:text-dark-text-primary'    // Pestaña inactiva
                             }`}
                         >
                             Cronograma de Pagos
