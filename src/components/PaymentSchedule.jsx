@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchData } from '../services/api';
 
-// Píldora para el estado del pago (versión simplificada)
+// Píldora para el estado del pago (sin cambios)
 const PaymentStatusPill = ({ status }) => {
     let pillClasses = 'px-3 py-1 text-xs font-semibold rounded-full ';
     switch (status.toLowerCase()) {
@@ -20,6 +20,24 @@ const PaymentStatusPill = ({ status }) => {
     return <span className={pillClasses}>{status}</span>;
 };
 
+// --- NUEVO: Componente para la fila "esqueleto" ---
+const ScheduleSkeletonRow = () => (
+    <tr className="animate-pulse">
+        <td className="px-6 py-4">
+            <div className="h-4 bg-slate-700 rounded w-2/3"></div>
+        </td>
+        <td className="px-6 py-4">
+            <div className="h-4 bg-slate-700 rounded w-24"></div>
+        </td>
+        <td className="px-6 py-4">
+            <div className="h-4 bg-slate-700 rounded w-28"></div>
+        </td>
+        <td className="px-6 py-4">
+            <div className="h-6 bg-slate-700 rounded-full w-24"></div>
+        </td>
+    </tr>
+);
+
 
 const PaymentSchedule = ({ enrollmentId }) => {
     const [schedule, setSchedule] = useState([]);
@@ -32,6 +50,9 @@ const PaymentSchedule = ({ enrollmentId }) => {
             setIsLoading(true);
             setError(null);
             try {
+                // Simulación de retraso de red para ver el efecto de carga
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
                 const allSchedules = await fetchData('/payments-schedules');
                 const filteredSchedule = allSchedules.filter(item => item.enrollmentId === enrollmentId);
                 setSchedule(filteredSchedule);
@@ -54,9 +75,29 @@ const PaymentSchedule = ({ enrollmentId }) => {
         return new Intl.DateTimeFormat('es-PE', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
     };
 
+    // --- MODIFICADO: Bloque de renderizado de carga ---
     if (isLoading) {
-        return <p className="p-4 text-center text-dark-text-secondary">Cargando cronograma...</p>;
+        return (
+            <div className="overflow-x-auto rounded-lg border border-dark-border">
+                <table className="min-w-full">
+                    <thead className="bg-slate-800">
+                    <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Concepto</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Monto</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Fecha de Vencimiento</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Estado</th>
+                    </tr>
+                    </thead>
+                    <tbody className="divide-y divide-dark-border">
+                    {[...Array(5)].map((_, index) => (
+                        <ScheduleSkeletonRow key={index} />
+                    ))}
+                    </tbody>
+                </table>
+            </div>
+        );
     }
+
 
     if (error) {
         return <p className="p-4 text-center text-red-400">{error}</p>;

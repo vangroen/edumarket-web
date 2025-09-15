@@ -57,22 +57,22 @@ const EnrollmentDetailsModal = ({enrollment, onClose}) => {
         <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 p-4">
             <div className="bg-dark-surface rounded-lg shadow-2xl w-full max-w-4xl flex flex-col max-h-full">
 
-                <div className="flex justify-between items-center p-8 pb-4">
+                <div className="flex justify-between items-center p-8 pb-4 flex-shrink-0">
                     <h2 className="text-2xl font-bold text-dark-text-primary">Detalles de la Matrícula</h2>
                     <button onClick={onClose} className="text-dark-text-secondary hover:text-dark-text-primary">
                         <Icon path="M6 18L18 6M6 6l12 12" className="w-6 h-6"/>
                     </button>
                 </div>
 
-                {/* --- SECCIÓN DE PESTAÑAS CON ESTILO HÍBRIDO (RECUADRO + SUBRAYADO) --- */}
+                {/* Sección de Pestañas con diseño mejorado */}
                 <div className="px-8 border-b border-dark-border">
                     <nav className="flex space-x-2 -mb-px">
                         <button
                             onClick={() => setActiveTab('details')}
                             className={`px-4 py-3 font-semibold text-sm rounded-t-lg transition-colors focus:outline-none border ${
                                 activeTab === 'details'
-                                    ? 'text-brand-accent bg-dark-surface border-dark-border border-b-dark-surface' // Pestaña activa
-                                    : 'text-dark-text-secondary border-transparent hover:text-dark-text-primary'    // Pestaña inactiva
+                                    ? 'text-brand-accent bg-dark-surface border-dark-border border-b-dark-surface'
+                                    : 'text-dark-text-secondary border-transparent hover:text-dark-text-primary'
                             }`}
                         >
                             Detalles Generales
@@ -81,8 +81,8 @@ const EnrollmentDetailsModal = ({enrollment, onClose}) => {
                             onClick={() => setActiveTab('schedule')}
                             className={`px-4 py-3 font-semibold text-sm rounded-t-lg transition-colors focus:outline-none border ${
                                 activeTab === 'schedule'
-                                    ? 'text-brand-accent bg-dark-surface border-dark-border border-b-dark-surface' // Pestaña activa
-                                    : 'text-dark-text-secondary border-transparent hover:text-dark-text-primary'    // Pestaña inactiva
+                                    ? 'text-brand-accent bg-dark-surface border-dark-border border-b-dark-surface'
+                                    : 'text-dark-text-secondary border-transparent hover:text-dark-text-primary'
                             }`}
                         >
                             Cronograma de Pagos
@@ -90,11 +90,11 @@ const EnrollmentDetailsModal = ({enrollment, onClose}) => {
                     </nav>
                 </div>
 
-                {/* --- 3. CONTENIDO CONDICIONAL DE LAS PESTAÑAS --- */}
+                {/* Contenido condicional de las pestañas */}
                 <div className="overflow-y-auto p-8">
                     {activeTab === 'details' && (
                         <div className="space-y-10 animate-fade-in">
-                            {/* --- Contenido de la Pestaña de Detalles --- */}
+                            {/* Información General */}
                             <div>
                                 <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Información General</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
@@ -113,6 +113,7 @@ const EnrollmentDetailsModal = ({enrollment, onClose}) => {
                                     <DetailField label="Fecha de Matrícula" value={formatDate(enrollment.enrollmentDate)}/>
                                 </div>
                             </div>
+                            {/* Datos del Estudiante */}
                             <div>
                                 <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Datos del Estudiante</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
@@ -127,6 +128,7 @@ const EnrollmentDetailsModal = ({enrollment, onClose}) => {
                                     <DetailField label="Dirección" value={enrollment.student.person.address}/>
                                 </div>
                             </div>
+                            {/* Datos del Agente */}
                             <div>
                                 <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Datos del Agente</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
@@ -143,7 +145,6 @@ const EnrollmentDetailsModal = ({enrollment, onClose}) => {
 
                     {activeTab === 'schedule' && (
                         <div className="animate-fade-in">
-                            {/* --- Contenido de la Pestaña de Cronograma --- */}
                             <PaymentSchedule enrollmentId={enrollment.id} />
                         </div>
                     )}
