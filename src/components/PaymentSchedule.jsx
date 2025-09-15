@@ -103,7 +103,7 @@ const PaymentSchedule = ({ enrollmentId }) => {
 
     if (isLoading) {
         return (
-            <div className="overflow-auto max-h-96 rounded-lg border border-dark-border">
+            <div className="rounded-lg border border-dark-border">
                 <table className="min-w-full">
                     <thead className="bg-slate-800 sticky top-0 z-10">
                     <tr>
@@ -123,11 +123,10 @@ const PaymentSchedule = ({ enrollmentId }) => {
 
     return (
         <>
-            <div className="overflow-auto max-h-96 rounded-lg border border-dark-border">
+            <div className="rounded-lg border border-dark-border">
                 <table className="min-w-full">
                     <thead className="bg-slate-800 sticky top-0 z-10">
                     <tr>
-                        {/* === CAMBIO 1: Alineación de cabeceras === */}
                         <th className="px-6 py-3 text-left text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Concepto</th>
                         <th className="px-6 py-3 text-right text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Monto</th>
                         <th className="px-6 py-3 text-center text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Fecha de Vencimiento</th>
@@ -138,7 +137,6 @@ const PaymentSchedule = ({ enrollmentId }) => {
                     <tbody className="divide-y divide-dark-border">
                     {schedule.map((item) => (
                         <tr key={item.id} className="hover:bg-slate-700/50">
-                            {/* === CAMBIO 2: Alineación de celdas de datos === */}
                             <td className="px-6 py-4 text-sm text-dark-text-primary">{item.conceptType.description}</td>
                             <td className="px-6 py-4 text-sm text-dark-text-primary whitespace-nowrap text-right">{formatCurrency(item.installmentAmount)}</td>
                             <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap text-center">{formatDate(item.installmentDueDate)}</td>

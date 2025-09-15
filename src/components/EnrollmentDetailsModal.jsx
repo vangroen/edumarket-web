@@ -62,7 +62,7 @@ const EnrollmentDetailsModal = ({enrollment, onClose}) => {
                     </button>
                 </div>
 
-                <div className="px-8 border-b border-dark-border">
+                <div className="px-8 border-b border-dark-border flex-shrink-0">
                     <nav className="flex space-x-2 -mb-px">
                         <button
                             onClick={() => setActiveTab('details')}
@@ -87,53 +87,52 @@ const EnrollmentDetailsModal = ({enrollment, onClose}) => {
                     </nav>
                 </div>
 
-                {/* === CAMBIO AQUÍ: Se eliminó "overflow-y-auto" para quitar el scrollbar exterior === */}
-                <div className="p-8">
+                {/* Contenedor de contenido principal que ahora gestiona el scroll */}
+                <div className="flex-1 overflow-y-auto p-8">
                     {activeTab === 'details' && (
-                        <div className="overflow-y-auto max-h-[60vh]"> {/* Scroll solo para detalles si es necesario */}
-                            <div className="space-y-10 animate-fade-in pr-4">
-                                <div>
-                                    <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Información General</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
-                                        <DetailField label="Curso" value={enrollment.course.name}/>
-                                        <DetailField label="Institución" value={enrollment.institution.name}/>
-                                        <DetailField label="Tipo de Institución">
-                                            <TypePill type={enrollment.institution.institutionType.description}/>
-                                        </DetailField>
-                                        <DetailField label="Costo de Matrícula" value={formatCurrency(enrollment.enrollmentFeeAmount)}/>
-                                        <DetailField label="Pago Mensual" value={formatCurrency(enrollment.monthlyFeeAmount)}/>
-                                        <DetailField label="Derechos Finales" value={formatCurrency(enrollment.finalRightsAmount)}/>
-                                        <DetailField label="Duración del curso">
-                                            <DurationPill months={enrollment.course.durationInMonths}/>
-                                        </DetailField>
-                                        <DetailField label="Costo Total" value={formatCurrency(enrollment.totalEnrollmentCost)}/>
-                                        <DetailField label="Fecha de Matrícula" value={formatDate(enrollment.enrollmentDate)}/>
-                                    </div>
+                        // El div interior ya no necesita gestionar el scroll
+                        <div className="space-y-10 animate-fade-in pr-2"> {/* Padding a la derecha para el scrollbar */}
+                            <div>
+                                <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Información General</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
+                                    <DetailField label="Curso" value={enrollment.course.name}/>
+                                    <DetailField label="Institución" value={enrollment.institution.name}/>
+                                    <DetailField label="Tipo de Institución">
+                                        <TypePill type={enrollment.institution.institutionType.description}/>
+                                    </DetailField>
+                                    <DetailField label="Costo de Matrícula" value={formatCurrency(enrollment.enrollmentFeeAmount)}/>
+                                    <DetailField label="Pago Mensual" value={formatCurrency(enrollment.monthlyFeeAmount)}/>
+                                    <DetailField label="Derechos Finales" value={formatCurrency(enrollment.finalRightsAmount)}/>
+                                    <DetailField label="Duración del curso">
+                                        <DurationPill months={enrollment.course.durationInMonths}/>
+                                    </DetailField>
+                                    <DetailField label="Costo Total" value={formatCurrency(enrollment.totalEnrollmentCost)}/>
+                                    <DetailField label="Fecha de Matrícula" value={formatDate(enrollment.enrollmentDate)}/>
                                 </div>
-                                <div>
-                                    <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Datos del Estudiante</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
-                                        <DetailField label="Nombres y Apellidos" value={`${enrollment.student.person.firstName} ${enrollment.student.person.lastName}`}/>
-                                        <DetailField label="Tipo de Documento"><DocumentPill type={enrollment.student.person.documentType.description}/></DetailField>
-                                        <DetailField label="Número de Documento" value={enrollment.student.person.documentNumber}/>
-                                        <DetailField label="Email" value={enrollment.student.person.email}/>
-                                        <DetailField label="Teléfono" value={enrollment.student.person.phone}/>
-                                        <DetailField label="Dirección" value={enrollment.student.person.address}/>
-                                        <DetailField label="Rango Académico"><AcademicRankPill rank={enrollment.student.academicRank.description}/></DetailField>
-                                        <DetailField label="Profesión" value={enrollment.student.profession.name}/>
-                                        <DetailField label="Institución de Origen" value={enrollment.student.institution.name}/>
-                                    </div>
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Datos del Estudiante</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
+                                    <DetailField label="Nombres y Apellidos" value={`${enrollment.student.person.firstName} ${enrollment.student.person.lastName}`}/>
+                                    <DetailField label="Tipo de Documento"><DocumentPill type={enrollment.student.person.documentType.description}/></DetailField>
+                                    <DetailField label="Número de Documento" value={enrollment.student.person.documentNumber}/>
+                                    <DetailField label="Email" value={enrollment.student.person.email}/>
+                                    <DetailField label="Teléfono" value={enrollment.student.person.phone}/>
+                                    <DetailField label="Dirección" value={enrollment.student.person.address}/>
+                                    <DetailField label="Rango Académico"><AcademicRankPill rank={enrollment.student.academicRank.description}/></DetailField>
+                                    <DetailField label="Profesión" value={enrollment.student.profession.name}/>
+                                    <DetailField label="Institución de Origen" value={enrollment.student.institution.name}/>
                                 </div>
-                                <div>
-                                    <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Datos del Agente</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
-                                        <DetailField label="Nombres y Apellidos" value={`${enrollment.agent.person.firstName} ${enrollment.agent.person.lastName}`}/>
-                                        <DetailField label="Tipo de Documento"><DocumentPill type={enrollment.agent.person.documentType.description}/></DetailField>
-                                        <DetailField label="Número de Documento" value={enrollment.agent.person.documentNumber}/>
-                                        <DetailField label="Email" value={enrollment.agent.person.email}/>
-                                        <DetailField label="Teléfono" value={enrollment.agent.person.phone}/>
-                                        <DetailField label="Dirección" value={enrollment.agent.person.address}/>
-                                    </div>
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Datos del Agente</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-6">
+                                    <DetailField label="Nombres y Apellidos" value={`${enrollment.agent.person.firstName} ${enrollment.agent.person.lastName}`}/>
+                                    <DetailField label="Tipo de Documento"><DocumentPill type={enrollment.agent.person.documentType.description}/></DetailField>
+                                    <DetailField label="Número de Documento" value={enrollment.agent.person.documentNumber}/>
+                                    <DetailField label="Email" value={enrollment.agent.person.email}/>
+                                    <DetailField label="Teléfono" value={enrollment.agent.person.phone}/>
+                                    <DetailField label="Dirección" value={enrollment.agent.person.address}/>
                                 </div>
                             </div>
                         </div>
@@ -146,8 +145,13 @@ const EnrollmentDetailsModal = ({enrollment, onClose}) => {
                     )}
                 </div>
 
-                <div className="flex-shrink-0 flex justify-end p-8 pt-6">
-                    <button type="button" onClick={onClose} className="px-6 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 font-semibold transition-colors">
+                {/* Pie de página responsivo */}
+                <div className="flex-shrink-0 flex justify-end p-4 border-t border-dark-border">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="w-full sm:w-auto px-6 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 font-semibold transition-colors"
+                    >
                         Cerrar
                     </button>
                 </div>
