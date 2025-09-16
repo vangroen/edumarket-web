@@ -136,8 +136,8 @@ const PaymentSchedule = ({ enrollmentId }) => {
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-dark-text-secondary uppercase tracking-wider rounded-tl-lg border-b border-dark-border">Concepto</th>
                             <th className="px-6 py-3 text-right text-xs font-medium text-dark-text-secondary uppercase tracking-wider border-b border-dark-border">Monto</th>
-                            <th className="px-6 py-3 text-center text-xs font-medium text-dark-text-secondary uppercase tracking-wider border-b border-dark-border">Fecha de Vencimiento</th>
                             <th className="px-6 py-3 text-center text-xs font-medium text-dark-text-secondary uppercase tracking-wider border-b border-dark-border">Estado</th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-dark-text-secondary uppercase tracking-wider border-b border-dark-border">Fecha de Vencimiento</th>
                             <th className="px-6 py-3 text-center text-xs font-medium text-dark-text-secondary uppercase tracking-wider rounded-tr-lg border-b border-dark-border">Acciones</th>
                         </tr>
                         </thead>
@@ -148,8 +148,8 @@ const PaymentSchedule = ({ enrollmentId }) => {
                                 {/* Se evita añadir el borde a la última fila para un acabado limpio */}
                                 <td className={`px-6 py-4 text-sm text-dark-text-primary ${schedule.length - 1 === index ? '' : 'border-b border-dark-border'}`}>{item.conceptType.description}</td>
                                 <td className={`px-6 py-4 text-sm text-dark-text-primary whitespace-nowrap text-right ${schedule.length - 1 === index ? '' : 'border-b border-dark-border'}`}>{formatCurrency(item.installmentAmount)}</td>
-                                <td className={`px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap text-center ${schedule.length - 1 === index ? '' : 'border-b border-dark-border'}`}>{formatDate(item.installmentDueDate)}</td>
                                 <td className={`px-6 py-4 text-sm text-dark-text-secondary text-center ${schedule.length - 1 === index ? '' : 'border-b border-dark-border'}`}><PaymentStatusPill status={item.installmentStatus.status} /></td>
+                                <td className={`px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap text-center ${schedule.length - 1 === index ? '' : 'border-b border-dark-border'}`}>{formatDate(item.installmentDueDate)}</td>
                                 <td className={`px-6 py-4 text-sm text-center ${schedule.length - 1 === index ? '' : 'border-b border-dark-border'}`}>
                                     {item.installmentStatus.status.toLowerCase() !== 'pagado' ? (
                                         <button
