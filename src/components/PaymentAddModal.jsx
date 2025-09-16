@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Icon from './ui/Icon';
 import ErrorModal from './ui/ErrorModal';
+import ConfirmPaymentModal from './ConfirmPaymentModal'; // Importamos el nuevo modal
 import { fetchData, createData } from '../services/api';
 
 const PaymentAddModal = ({ scheduleItem, onClose, onSave }) => {
@@ -8,15 +9,13 @@ const PaymentAddModal = ({ scheduleItem, onClose, onSave }) => {
     const [paymentTypes, setPaymentTypes] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState('');
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false); // Nuevo estado
 
     useEffect(() => {
         const loadPaymentTypes = async () => {
             try {
                 const data = await fetchData('/payment-type');
                 setPaymentTypes(data);
-                if (data.length > 0) {
-                    setIdPaymentType(data[0].id);
-                }
             } catch (err) {
                 setError('No se pudieron cargar los tipos de pago.');
             }
@@ -28,8 +27,7 @@ const PaymentAddModal = ({ scheduleItem, onClose, onSave }) => {
         return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(amount);
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleActualSubmit = async () => {
         if (!idPaymentType) {
             setError('Debe seleccionar un tipo de pago.');
             return;
@@ -51,8 +49,14 @@ const PaymentAddModal = ({ scheduleItem, onClose, onSave }) => {
             setError(err.message || 'Ocurrió un error al registrar el pago.');
         } finally {
             setIsSaving(false);
+            setIsConfirmModalOpen(false);
         }
     };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setIsConfirmModalOpen(true);
+    }
 
     return (
         <>
@@ -65,12 +69,10 @@ const PaymentAddModal = ({ scheduleItem, onClose, onSave }) => {
                         </button>
                     </div>
 
-                    {/* === INICIO DE CAMBIOS === */}
                     <div className="space-y-6">
                         {/* Sección de Detalles de la cuota */}
                         <div>
                             <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Detalles de la Cuota</h3>
-                            {/* Se reemplaza el grid por un contenedor con espaciado vertical */}
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-dark-text-secondary mb-2">Concepto</label>
@@ -96,7 +98,6 @@ const PaymentAddModal = ({ scheduleItem, onClose, onSave }) => {
                         {/* Sección de Datos del pago */}
                         <div>
                             <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Datos del Pago</h3>
-                            {/* Ya no es necesario un grid para un solo elemento */}
                             <div>
                                 <label htmlFor="paymentType" className="block text-sm font-medium text-dark-text-secondary mb-2">Tipo de Pago</label>
                                 <select
@@ -106,7 +107,7 @@ const PaymentAddModal = ({ scheduleItem, onClose, onSave }) => {
                                     className="w-full bg-dark-bg border border-dark-border rounded-lg py-2 px-4 text-dark-text-primary"
                                     required
                                 >
-                                    <option value="" disabled>Seleccione...</option>
+                                    <option value="" disabled>Seleccione tipo de pago</option>
                                     {paymentTypes.map(type => (
                                         <option key={type.id} value={type.id}>{type.description}</option>
                                     ))}
@@ -114,7 +115,6 @@ const PaymentAddModal = ({ scheduleItem, onClose, onSave }) => {
                             </div>
                         </div>
                     </div>
-                    {/* === FIN DE CAMBIOS === */}
 
                     <div className="flex justify-end gap-4 pt-8">
                         <button type="button" onClick={onClose} className="px-6 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 font-semibold transition-colors">Cancelar</button>
@@ -125,6 +125,13 @@ const PaymentAddModal = ({ scheduleItem, onClose, onSave }) => {
                 </form>
             </div>
             {error && <ErrorModal message={error} onClose={() => setError('')} />}
+            {isConfirmModalOpen && (
+                <ConfirmPaymentModal
+                    amount={formatCurrency(scheduleItem.installmentAmount)}
+                    onConfirm={handleActualSubmit}
+                    onClose={() => setIsConfirmModalOpen(false)}
+                />
+            )}
         </>
     );
 };
