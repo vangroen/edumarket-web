@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Icon from './ui/Icon';
 import PaymentSchedule from "./PaymentSchedule.jsx";
 
-// --- COMPONENTES AUXILIARES ---
+// --- COMPONENTES AUXILIARES (sin cambios) ---
 const TypePill = ({type}) => {
     const pillClasses = `px-3 py-1 text-xs font-semibold rounded-full capitalize ${
         type.toLowerCase() === 'universidad'
@@ -87,9 +87,12 @@ const EnrollmentDetailsModal = ({enrollment, onClose}) => {
                     </nav>
                 </div>
 
-                <div className="flex-1 overflow-y-auto">
-                    <div className="p-8">
-                        {activeTab === 'details' && (
+                {/* === INICIO DE CAMBIOS === */}
+                {/* Contenedor principal del contenido, ya no tiene scroll */}
+                <div className="flex-1 overflow-hidden">
+                    {activeTab === 'details' && (
+                        /* Contenedor con scroll para la pestaña de Detalles */
+                        <div className="h-full overflow-y-auto p-8">
                             <div className="space-y-10 animate-fade-in">
                                 <div>
                                     <h3 className="text-lg font-medium text-sky-400 mb-4 border-b border-dark-border pb-2">Información General</h3>
@@ -135,17 +138,20 @@ const EnrollmentDetailsModal = ({enrollment, onClose}) => {
                                     </div>
                                 </div>
                             </div>
-                        )}
+                        </div>
+                    )}
 
-                        {activeTab === 'schedule' && (
-                            <div className="animate-fade-in">
+                    {activeTab === 'schedule' && (
+                        /* Contenedor para la pestaña de Cronograma (sin scroll propio, el componente hijo lo tendrá) */
+                        <div className="p-8 h-full">
+                            <div className="animate-fade-in h-full">
                                 <PaymentSchedule enrollmentId={enrollment.id} />
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
+                {/* === FIN DE CAMBIOS === */}
 
-                {/* Pie del modal - CAMBIO AQUÍ: Se eliminó el borde superior */}
                 <div className="flex-shrink-0 flex justify-end p-4">
                     <button
                         type="button"

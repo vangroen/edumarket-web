@@ -48,6 +48,8 @@ const PaymentSchedule = ({ enrollmentId }) => {
         if (!enrollmentId) return;
         setError(null);
         try {
+            // Simulación de carga
+            await new Promise(resolve => setTimeout(resolve, 1500));
             const allSchedules = await fetchData('/payments-schedules');
             const filteredSchedule = allSchedules.filter(item => item.enrollmentId === enrollmentId);
             setSchedule(filteredSchedule);
@@ -103,66 +105,74 @@ const PaymentSchedule = ({ enrollmentId }) => {
 
     if (isLoading) {
         return (
-            <div className="rounded-lg border border-dark-border">
-                <table className="min-w-full">
-                    <thead className="bg-slate-800 sticky top-0 z-10">
-                    <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Concepto</th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Monto</th>
-                        <th className="px-6 py-3 text-center text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Fecha de Vencimiento</th>
-                        <th className="px-6 py-3 text-center text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Estado</th>
-                        <th className="px-6 py-3 text-center text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Acciones</th>
-                    </tr>
-                    </thead>
-                    <tbody className="divide-y divide-dark-border">{[...Array(6)].map((_, index) => <ScheduleSkeletonRow key={index} />)}</tbody>
-                </table>
+            // === INICIO DE CAMBIOS ===
+            // La estructura del esqueleto ahora coincide con la de la tabla cargada
+            <div className="rounded-lg border border-dark-border flex flex-col h-full">
+                <div className="overflow-auto flex-1">
+                    <table className="min-w-full">
+                        <thead className="bg-slate-800 sticky top-0 z-10 border-b border-dark-border">
+                        <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Concepto</th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Monto</th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Fecha de Vencimiento</th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Estado</th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody className="divide-y divide-dark-border">{[...Array(6)].map((_, index) => <ScheduleSkeletonRow key={index} />)}</tbody>
+                    </table>
+                </div>
             </div>
+            // === FIN DE CAMBIOS ===
         );
     }
+
     if (error) { return <p className="p-4 text-center text-red-400">{error}</p>; }
 
     return (
         <>
-            <div className="rounded-lg border border-dark-border">
-                <table className="min-w-full">
-                    <thead className="bg-slate-800 sticky top-0 z-10">
-                    <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Concepto</th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Monto</th>
-                        <th className="px-6 py-3 text-center text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Fecha de Vencimiento</th>
-                        <th className="px-6 py-3 text-center text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Estado</th>
-                        <th className="px-6 py-3 text-center text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Acciones</th>
-                    </tr>
-                    </thead>
-                    <tbody className="divide-y divide-dark-border">
-                    {schedule.map((item) => (
-                        <tr key={item.id} className="hover:bg-slate-700/50">
-                            <td className="px-6 py-4 text-sm text-dark-text-primary">{item.conceptType.description}</td>
-                            <td className="px-6 py-4 text-sm text-dark-text-primary whitespace-nowrap text-right">{formatCurrency(item.installmentAmount)}</td>
-                            <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap text-center">{formatDate(item.installmentDueDate)}</td>
-                            <td className="px-6 py-4 text-sm text-dark-text-secondary text-center"><PaymentStatusPill status={item.installmentStatus.status} /></td>
-                            <td className="px-6 py-4 text-sm text-center">
-                                {item.installmentStatus.status.toLowerCase() !== 'pagado' ? (
-                                    <button
-                                        onClick={() => handleOpenPaymentModal(item)}
-                                        className="px-3 py-1.5 bg-brand-accent/80 text-white rounded-lg hover:bg-brand-accent text-xs font-semibold transition-colors"
-                                    >
-                                        Registrar Pago
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={() => handleOpenDetailsModal(item)}
-                                        className="px-3 py-1.5 bg-slate-600/80 text-white rounded-lg hover:bg-slate-600 text-xs font-semibold transition-colors"
-                                        disabled={isFetchingDetails}
-                                    >
-                                        Ver Detalle
-                                    </button>
-                                )}
-                            </td>
+            <div className="rounded-lg border border-dark-border flex flex-col h-full">
+                <div className="overflow-auto flex-1">
+                    <table className="min-w-full">
+                        <thead className="bg-slate-800 sticky top-0 z-10 border-b border-dark-border">
+                        <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Concepto</th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Monto</th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Fecha de Vencimiento</th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Estado</th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-dark-text-secondary uppercase tracking-wider">Acciones</th>
                         </tr>
-                    ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="divide-y divide-dark-border">
+                        {schedule.map((item) => (
+                            <tr key={item.id} className="hover:bg-slate-700/50">
+                                <td className="px-6 py-4 text-sm text-dark-text-primary">{item.conceptType.description}</td>
+                                <td className="px-6 py-4 text-sm text-dark-text-primary whitespace-nowrap text-right">{formatCurrency(item.installmentAmount)}</td>
+                                <td className="px-6 py-4 text-sm text-dark-text-secondary whitespace-nowrap text-center">{formatDate(item.installmentDueDate)}</td>
+                                <td className="px-6 py-4 text-sm text-dark-text-secondary text-center"><PaymentStatusPill status={item.installmentStatus.status} /></td>
+                                <td className="px-6 py-4 text-sm text-center">
+                                    {item.installmentStatus.status.toLowerCase() !== 'pagado' ? (
+                                        <button
+                                            onClick={() => handleOpenPaymentModal(item)}
+                                            className="px-3 py-1.5 bg-brand-accent/80 text-white rounded-lg hover:bg-brand-accent text-xs font-semibold transition-colors"
+                                        >
+                                            Registrar Pago
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => handleOpenDetailsModal(item)}
+                                            className="px-3 py-1.5 bg-slate-600/80 text-white rounded-lg hover:bg-slate-600 text-xs font-semibold transition-colors"
+                                            disabled={isFetchingDetails}
+                                        >
+                                            Ver Detalle
+                                        </button>
+                                    )}
+                                </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             {isPaymentModalOpen && (
